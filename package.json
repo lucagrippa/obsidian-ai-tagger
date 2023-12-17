@@ -20,5 +20,9 @@
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
+	},
+	"dependencies": {
+		"langchain": "^0.0.162",
+		"openai": "^4.11.1"
 	}
 }
