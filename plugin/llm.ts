@@ -97,10 +97,17 @@ export class LLM {
         tags.forEach((tag: string) => {
             tagsString += tag + " "
         });
-        tagsString += "\nnew tags: "
-        newTags.forEach((tag: string) => {
-            tagsString += tag + " "
-        });
+        
+        // if there are new tags, add a separator
+        if (newTags.length > 0) {
+            tagsString += "| "
+            // tagsString += "\nnew tags: "
+
+            newTags.forEach((tag: string) => {
+                tagsString += tag + " "
+            });
+        }
+
         tagsString += "\n"
 
         return tagsString
