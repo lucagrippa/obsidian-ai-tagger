@@ -13,13 +13,14 @@ The plugin analyzes the current document that you have open in the editor and al
 - the simplest way to use the plugin is from the ribbon located on the left sidebar.
 - click the "Wand" ribbon icon to automatically generate tags for your current document.
 
-![One click tagging](images/one_click_tagging.gif)
+    ![One click tagging](images/one_click_tagging.gif)
 
 ### More precise tagging
 - another way to call the AI Tagger is from the Command palette (`Ctrl+P` or `Cmd+P` on macOS).
 - using the Command palette navigate to the "Generate tags" command to tag your current document.
 - to tag a specific part of your document highlight the text before using the Command palette.
-![Command palette tagging](images/command_palette_tagging.gif)
+
+    ![Command palette tagging](images/command_palette_tagging.gif)
 
 ## Installation
 Navigate to the Obsidian settings and search AI Tagger in the Community plugins section. You can also manually download the latest release from this repository's GitHub releases by extracting the ZIP file to your Obsidian plugins folder.
