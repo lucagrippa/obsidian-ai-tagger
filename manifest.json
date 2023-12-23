@@ -1,11 +1,10 @@
 {
-	"id": "ai-plugin",
-	"name": "AI Plugin",
+	"id": "ai-tagger",
+	"name": "AI Tagger",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Simplify tagging in Obsidian. Instantly analyze and tag your document with one click for efficient note organization. OpenAI API key required",
 	"author": "Luca Grippa",
 	"authorUrl": "https://lucagrippa.io",
-	"fundingUrl": "https://lucagrippa.io",
 	"isDesktopOnly": false
 }
