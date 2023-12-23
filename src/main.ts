@@ -2,7 +2,6 @@ import { Editor, MarkdownView, Notice, Plugin } from 'obsidian';
 import { AiTaggerSettingTab } from "./settings";
 import { LLM } from "./llm";
 
-
 // my settings definition
 // this tells me what settings I want the user to be able to configure
 // while the plugin is enabled you can access these settings from the settings member variable
@@ -11,7 +10,6 @@ interface AiTaggerSettings {
 	model: string;
 }
 
-// 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
 const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
 	model: 'gpt-3.5-turbo'
 }
