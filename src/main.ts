@@ -1,26 +1,26 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { AiPluginSettingTab } from "./settings";
+import { Editor, MarkdownView, Notice, Plugin } from 'obsidian';
+import { AiTaggerSettingTab } from "./settings";
 import { LLM } from "./llm";
-import { get } from 'http';
+
 // Remember to rename these classes and interfaces!
 
 // my settings definition
 // this tells me what settings I want the user to be able to configure
 // while the plugin is enabled you can access these settings from the settings member variable
-interface AiPluginSettings {
+interface AiTaggerSettings {
 	openai_api_key: string;
 	model: string;
 }
 
 // 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
-const DEFAULT_SETTINGS: Partial<AiPluginSettings> = {
+const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
 	openai_api_key: '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',
 	model: 'gpt-3.5'
 }
 
 
-export default class AiPlugin extends Plugin {
-	settings: AiPluginSettings;
+export default class AiTagger extends Plugin {
+	settings: AiTaggerSettings;
 	llm: LLM;
 
 	// this function retrieves data from disk
@@ -43,7 +43,7 @@ export default class AiPlugin extends Plugin {
 		await this.loadSettings();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new AiPluginSettingTab(this.app, this));
+		this.addSettingTab(new AiTaggerSettingTab(this.app, this));
 
 		// instantiate LLM class
 		this.llm = new LLM(this.settings.model, this.settings.openai_api_key);
@@ -82,7 +82,7 @@ export default class AiPlugin extends Plugin {
 						selection = editor.getValue();
 					}
 
-					let response = await this.llm.generateTags(selection);
+					const response = await this.llm.generateTags(selection);
 
 					// write the responses to the top of the document in the editor
 					editor.replaceRange(response, { line: 0, ch: 0 });

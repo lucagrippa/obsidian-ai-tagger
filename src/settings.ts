@@ -1,10 +1,10 @@
-import AiPlugin from "./main";
+import AiTagger from "./main";
 import { App, PluginSettingTab, Setting } from 'obsidian';
 
-export class AiPluginSettingTab extends PluginSettingTab {
-    plugin: AiPlugin;
+export class AiTaggerSettingTab extends PluginSettingTab {
+    plugin: AiTagger;
 
-    constructor(app: App, plugin: AiPlugin) {
+    constructor(app: App, plugin: AiTagger) {
         super(app, plugin);
         this.plugin = plugin;
     }

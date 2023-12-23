@@ -143,7 +143,7 @@ export class LLM {
         }
 
         // get every tag in the current vault
-        let vaultTags = getVaultTags()
+        const vaultTags = getVaultTags()
         // create a string of tags to insert into the prompt as a list
         let tagsString = ""
         vaultTags.forEach(tag => {
