@@ -14,8 +14,7 @@ interface AiTaggerSettings {
 
 // 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
 const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
-	openai_api_key: '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',
-	model: 'gpt-3.5'
+	model: 'gpt-3.5-turbo'
 }
 
 
