@@ -2,7 +2,6 @@ import { Editor, MarkdownView, Notice, Plugin } from 'obsidian';
 import { AiTaggerSettingTab } from "./settings";
 import { LLM } from "./llm";
 
-// Remember to rename these classes and interfaces!
 
 // my settings definition
 // this tells me what settings I want the user to be able to configure

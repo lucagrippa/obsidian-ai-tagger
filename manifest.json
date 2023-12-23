@@ -1,7 +1,7 @@
 {
 	"id": "ai-tagger",
 	"name": "AI Tagger",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Simplify tagging in Obsidian. Instantly analyze and tag your document with one click for efficient note organization. OpenAI API key required",
 	"author": "Luca Grippa",
