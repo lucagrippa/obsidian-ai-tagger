@@ -61,6 +61,10 @@ export default class AiTagger extends Plugin {
 					new Notice(error.message);
 					console.error('Error while generating tags:', error);
 				}
+			} else {
+				const message = "Open a document to use the AI Tagger"
+				new Notice(message);
+					console.info(message);
 			}
 		});
 
