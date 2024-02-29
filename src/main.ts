@@ -1,6 +1,7 @@
-import { Editor, MarkdownView, Notice, Plugin } from 'obsidian';
+import { Editor, MarkdownView, Notice, Plugin, getFrontMatterInfo } from 'obsidian';
 import { AiTaggerSettingTab } from "./settings";
 import { LLM } from "./llm";
+import * as yaml from "js-yaml";
 
 // my settings definition
 // this tells me what settings I want the user to be able to configure
@@ -33,6 +34,104 @@ export default class AiTagger extends Plugin {
 		this.llm = new LLM(this.settings.model, this.settings.openai_api_key);
 	}
 
+	async tagDocument(documentContents: string, editor: Editor) {
+		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(documentContents);
+
+		let content: string = documentContents.substring(contentStart);
+		console.log("Content:", content.substring(0, 30) + "...")
+
+		// generate tags for the document using an LLM
+		const generatedTags: string = await this.llm.generateTags(content);
+		console.log("Generated Tags:", generatedTags)
+
+		if (exists) {
+			let yamlFrontMatter = yaml.load(frontmatter);
+
+			// Update existing "tags" property with generated tags
+			if (yamlFrontMatter.tags === undefined) {
+				yamlFrontMatter.tags = generatedTags;
+			} else {
+				yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
+			}
+
+			// write the frontmatter to the top of the document in the editor
+			const updatedFrontMatter = yaml.dump(yamlFrontMatter);
+			editor.replaceRange(
+				updatedFrontMatter,
+				editor.offsetToPos(from),
+				editor.offsetToPos(to)
+			);
+		} else {
+			// create front matter
+			const newFrontmatter = `---\ntags: ${generatedTags}\n---\n`
+			// write the frontmatter to the top of the document in the editor
+			editor.replaceRange(newFrontmatter, { line: 0, ch: 0 });
+		}
+	}
+
+	async tagSelection(selection: string, editor: Editor) {
+		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(selection);
+
+		let content: string = selection.substring(contentStart);
+		console.log("Content:", content.substring(0, 30) + "...")
+
+		// generate tags for the document using an LLM
+		const generatedTags: string = await this.llm.generateTags(content);
+		console.log("Generated Tags:", generatedTags)
+
+		if (exists) {
+			let yamlFrontMatter = yaml.load(frontmatter);
+
+			// Update existing "tags" property with generated tags
+			if (yamlFrontMatter.tags === undefined) {
+				yamlFrontMatter.tags = generatedTags;
+			} else {
+				yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
+			}
+
+			// write the frontmatter to the top of the document in the editor
+			const updatedFrontMatter = yaml.dump(yamlFrontMatter);
+			editor.replaceRange(
+				updatedFrontMatter,
+				editor.offsetToPos(from),
+				editor.offsetToPos(to)
+			);
+		} else {
+			// check to see if this is a selection that doesn't include the frontmatter of the document
+			// if so, we don't need to create new frontmatter we just need to add the tags to the current frontmatter
+			console.log("Selection with no frontmatter:", selection.substring(0, 30) + "...")
+			let fileContents: string = editor.getValue();
+			console.log("File Contents:", fileContents.substring(0, 30) + "...")
+			let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(fileContents);
+
+			// if there is frontmatter, we need to add it
+			if (exists) {
+				let yamlFrontMatter = yaml.load(frontmatter);
+				console.log("Overall document has frontmatter:", yamlFrontMatter)
+
+				// Update existing "tags" property with generated tags
+				if (yamlFrontMatter.tags === undefined) {
+					yamlFrontMatter.tags = generatedTags;
+				} else {
+					yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
+				}
+
+				// write the frontmatter to the top of the document in the editor
+				const updatedFrontMatter = yaml.dump(yamlFrontMatter);
+				editor.replaceRange(
+					updatedFrontMatter,
+					editor.offsetToPos(from),
+					editor.offsetToPos(to)
+				);
+			} else {
+				console.log("Overall document doesn't have frontmatter:")
+				// create front matter
+				const newFrontmatter = `---\ntags: ${generatedTags}\n---\n`
+				// write the frontmatter to the top of the document in the editor
+				editor.replaceRange(newFrontmatter, { line: 0, ch: 0 });
+			}
+		}
+	}
 
 	async onload() {
 		// load settings on plugin load
@@ -47,24 +146,20 @@ export default class AiTagger extends Plugin {
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
 			// Called when the user clicks the icon.
-			// const { editor: Editor } = this.app.workspace.getActiveViewOfType(MarkdownView);
 			const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (markdownView) {
 				try {
-					const value = markdownView.editor.getValue();
-
-					const response = await this.llm.generateTags(value);
-
-					// write the responses to the top of the document in the editor
-					markdownView.editor.replaceRange(response, { line: 0, ch: 0 });
+					// get current document as a string
+					let fileContents: string = markdownView.editor.getValue();
+					this.tagDocument(fileContents, markdownView.editor);
 				} catch (error) {
 					new Notice(error.message);
 					console.error('Error while generating tags:', error);
 				}
 			} else {
-				const message = "Open a document to use the AI Tagger"
+				const message = "Open and select a document to use the AI Tagger"
 				new Notice(message);
-					console.info(message);
+				console.info(message);
 			}
 		});
 
@@ -75,17 +170,16 @@ export default class AiTagger extends Plugin {
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				try {
+					// get current selection as a string
 					let selection = editor.getSelection();
 
 					if (selection === "") {
 						// if selection is empty, use the entire document
-						selection = editor.getValue();
+						let fileContents: string = editor.getValue();
+						this.tagDocument(fileContents, editor);
+					} else {
+						this.tagSelection(selection, editor);
 					}
-
-					const response = await this.llm.generateTags(selection);
-
-					// write the responses to the top of the document in the editor
-					editor.replaceRange(response, { line: 0, ch: 0 });
 				} catch (error) {
 					new Notice(error.message);
 					console.error('Error while generating tags:', error);
