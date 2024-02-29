@@ -1,14 +1,14 @@
 import { getAllTags, Notice } from 'obsidian';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
-import { RunnableSequence } from 'langchain/dist/schema/runnable';
+import { Runnable } from '@langchain/core/runnables';
 import {
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
-} from "langchain/prompts";
+} from "@langchain/core/prompts";
 
 
 function getVaultTags() {
@@ -31,7 +31,7 @@ function getVaultTags() {
 // write a class to instantiate the chain and handle the prompts
 export class LLM {
     modelName: string;
-    chain: RunnableSequence;
+    chain: Runnable;
 
     constructor(modelName: string, openAIApiKey: string) {
         this.modelName = modelName;
@@ -49,10 +49,10 @@ export class LLM {
     EXISTING TAGS:
     {tagsString}
 
-    Tag the following document based on its content. You can use up to 5 existing tags and if necessary create up to 3 new tags. Ensure that the tags accurately reflect the article's primary focus and themes.
+    Tag the following document based on its content. You can use between 1 and 5 of the EXISTING TAGS but also create 1 to 3 new tags. Ensure that the tags accurately reflect the article's primary focus and themes.
     `
 
-        const humanMessage = "DOCUMENT: \n \"{document}\" \n TAGS: \n"
+        const humanMessage = "DOCUMENT: \n ```{document}``` \n TAGS: \n"
 
         const prompt = new ChatPromptTemplate({
             promptMessages: [
@@ -81,19 +81,20 @@ export class LLM {
         const functionCallingModel = llm.bind({
             functions: [
                 {
-                    name: "output_formatter",
-                    description: "Should always be used to properly format output",
+                    name: "document_tagger",
+                    description: "Should always be used to tag documents.",
                     parameters: zodToJsonSchema(zodSchema),
                 },
             ],
-            function_call: { name: "output_formatter" },
+            function_call: { name: "document_tagger" },
         });
 
         return functionCallingModel;
     }
 
     formatTagsString(tags: string[], newTags: string[]) {
-        let tagsString = "tags: "
+        // let tagsString = "tags: "
+        let tagsString = ""
         tags.forEach((tag: string) => {
             tagsString += tag + " "
         });
@@ -134,13 +135,13 @@ export class LLM {
     }
 
     async generateTags(documentText: string) {
+        // check if the text is within the limit
+        // if (this.isTextWithinLimit(documentText, this.modelName)) {
+        //     throw new Error('Your document is too long. Please reduce the length of your document.');
+        // }
+
         console.log("Generating tags...")
         new Notice("Generating tags...")
-
-        // check if the text is within the limit
-        if (!this.isTextWithinLimit(documentText, this.modelName)) {
-            throw new Error('Your document is too long. Please reduce the length of your document.');
-        }
 
         // get every tag in the current vault
         const vaultTags = getVaultTags()
@@ -155,6 +156,7 @@ export class LLM {
                 tagsString: tagsString,
                 document: documentText,
             });
+            console.log("LLM RESPONSE:", response)
 
             const tags = this.formatTagsString(response.tags, response.newTags)
             return tags
@@ -164,8 +166,25 @@ export class LLM {
             if (error.message.includes('Incorrect API key')) {
                 // Notify the user about the incorrect API key
                 throw new Error('Incorrect API key. Please check your API key.');
-            }
-            else if (error.message.includes('Please reduce the length')) {
+            // } else if (error.message.includes('Invalid Authentication')) {
+            //     // Notify the user about the incorrect API key
+            //     throw new Error('Incorrect API key. Please check your API key.');
+            // } else if (error.message.includes('You must be a member of an organization to use the API')) {
+            //     // Notify the user about the incorrect API key
+            //     throw new Error('Your account is not part of an organization.  Contact OpenAI to get added to a new organization or ask your organization manager to invite you to an organization.');
+            } else if (error.message.includes('Rate limit reached for requests')) {
+                // Notify the user about the incorrect API key
+                throw new Error('You are sending requests too quickly. Please pace your requests or read OpenAI\'s Rate limit guide.');
+            } else if (error.message.includes('You exceeded your current quota, please check your plan and billing details')) {
+                // Notify the user about the incorrect API key
+                throw new Error('You have run out of OpenAI credits or hit your maximum monthly spend.');
+            } else if (error.message.includes('The server had an error while processing your request')) {
+                // Notify the user about the incorrect API key
+                throw new Error('Issue on OpenAI\'s servers. Please retry your request after a brief wait.');
+            } else if (error.message.includes('The engine is currently overloaded, please try again later')) {
+                // Notify the user about the incorrect API key
+                throw new Error('OpenAI\'s servers are experiencing high traffic. Please retry your requests after a brief wait.');
+            } else if (error.message.includes('Please reduce the length')) {
                 // Notify the user about the incorrect API key
                 throw new Error('Your document is too long. Please reduce the length of your document.');
             } else {
