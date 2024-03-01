@@ -152,6 +152,12 @@ export default class AiTagger extends Plugin {
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
+			// check if API key is set
+			if (this.settings.openai_api_key === "") {
+				new Notice("Please set your OpenAI API key in the settings.");
+				return;
+			}
+			
 			try {
 				// instantiate LLM class
 				let llm = new LLM(this.settings.model, this.settings.openai_api_key);
@@ -179,6 +185,12 @@ export default class AiTagger extends Plugin {
 			id: 'generate-tags',
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				// check if API key is set
+				if (this.settings.openai_api_key === "") {
+					new Notice("Please set your OpenAI API key in the settings.");
+					return;
+				}
+
 				try {
 					// instantiate LLM class
 					let llm = new LLM(this.settings.model, this.settings.openai_api_key);
