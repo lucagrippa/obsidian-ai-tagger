@@ -24,7 +24,7 @@
 	},
 	"dependencies": {
 		"js-yaml": "^4.1.0",
-		"langchain": "^0.1.21",
+		"langchain": "^0.1.28",
 		"openai": "^4.28.0"
 	}
 }
