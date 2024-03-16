@@ -9,6 +9,7 @@ import * as yaml from "js-yaml";
 interface AiTaggerSettings {
 	openai_api_key: string;
 	model: string;
+	custom_base_url: string;
 }
 
 const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
@@ -31,7 +32,7 @@ export default class AiTagger extends Plugin {
 	async saveSettings() {
 		// loadData() and saveData() provide an easy way to store and retrieve data from disk.
 		await this.saveData(this.settings);
-		this.llm = new LLM(this.settings.model, this.settings.openai_api_key);
+		this.llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
 	}
 
 	async tagDocument(documentContents: string, editor: Editor, llm: LLM) {
@@ -160,7 +161,12 @@ export default class AiTagger extends Plugin {
 			
 			try {
 				// instantiate LLM class
-				let llm = new LLM(this.settings.model, this.settings.openai_api_key);
+
+				// print custom base url and type 
+				console.log("Custom Base URL:", this.settings.custom_base_url)
+				console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
+
+				let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
 
 				// Called when the user clicks the icon.
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -193,7 +199,7 @@ export default class AiTagger extends Plugin {
 
 				try {
 					// instantiate LLM class
-					let llm = new LLM(this.settings.model, this.settings.openai_api_key);
+					let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
 
 					// get current selection as a string
 					let selection = editor.getSelection();

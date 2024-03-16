@@ -20,16 +20,16 @@ export class AiTaggerSettingTab extends PluginSettingTab {
         new Setting(containerElement)
             .setName('OpenAI API Key')
             .setDesc('Your API key for OpenAI')
-            .addText(text => 
+            .addText(text =>
                 text
-                    .setPlaceholder('Enter your API key')
+                    .setPlaceholder('Enter API key')
                     .setValue(this.plugin.settings.openai_api_key)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
                         this.plugin.settings.openai_api_key = value;
                         await this.plugin.saveSettings();
                     })
-                );
+            );
 
         new Setting(containerElement)
             .setName('Model')
@@ -45,5 +45,21 @@ export class AiTaggerSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 });
             });
+
+        // Override the default base URL for the model's API, leave blank if not using a proxy or service emulator.
+        // Base URL path for API requests, leave blank if not using a proxy or service emulator.
+        new Setting(containerElement)
+            .setName('Custom Base URL')
+            .setDesc('Override the default base URL for the model\'s API, leave blank if not using a proxy or service emulator.')
+            .addText(text =>
+                text
+                    .setPlaceholder('Enter custom Base URL')
+                    .setValue(this.plugin.settings.custom_base_url)
+                    // Update the settings object whenever the value of the text field changes, and then save it to disk:
+                    .onChange(async (value) => {
+                        this.plugin.settings.custom_base_url = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
     }
 }

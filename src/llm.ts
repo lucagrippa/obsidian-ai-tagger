@@ -30,16 +30,18 @@ function getVaultTags() {
 
 // write a class to instantiate the chain and handle the prompts
 export class LLM {
+    baseURL: string | null;
     modelName: string;
+    openAIApiKey: string;
     chain: Runnable;
 
-    constructor(modelName: string, openAIApiKey: string) {
+    constructor(modelName: string, openAIApiKey: string, baseURL: string | null = null) {
+        this.baseURL = baseURL;
         this.modelName = modelName;
+        this.openAIApiKey = openAIApiKey;
         const prompt: ChatPromptTemplate = this.getPrompt();
-        const functionCallingModel = this.getModel(modelName, openAIApiKey);
+        const functionCallingModel = this.getModel();
 
-        // const outputParserParams = JsonOutputKeyToolsParserParams()
-        // const outputParser = new JsonOutputKeyToolsParser(keyName=document_tagger, returnSingle=true);
         const outputParser = new JsonOutputKeyToolsParser({
             keyName: "document_tagger",
             returnSingle: true,
@@ -64,18 +66,11 @@ export class LLM {
             SystemMessagePromptTemplate.fromTemplate(systemMessage),
             HumanMessagePromptTemplate.fromTemplate(humanMessage),
         ]);
-        // const prompt = new ChatPromptTemplate({
-        //     promptMessages: [
-        //         SystemMessagePromptTemplate.fromTemplate(systemMessage),
-        //         HumanMessagePromptTemplate.fromTemplate(humanMessage),
-        //     ],
-        //     inputVariables: ["tagsString", "document"],
-        // });
 
         return prompt;
     }
 
-    getModel(modelName: string, openAIApiKey: string) {
+    getModel() {
         const zodSchema = z.object({
             tags: z.array(z.string()).describe("An array of tags that best describes the text using existing tags."),
             newTags: z.array(z.string()).describe("An array of tags that best describes the text using new tags."),
@@ -84,9 +79,14 @@ export class LLM {
         try {
             const llm = new ChatOpenAI({
                 temperature: 0,
-                modelName: modelName,
-                openAIApiKey: openAIApiKey,
+                modelName: this.modelName,
+                openAIApiKey: this.openAIApiKey,
+                configuration: {
+                    baseURL: this.baseURL,
+                    timeout: 10000, // 10 seconds
+                }
             });
+            
             // Binding "function_call" below makes the model always call the specified function.
             // If you want to allow the model to call functions selectively, omit it.
             const llmWithTools = llm.bind({
@@ -203,17 +203,23 @@ export class LLM {
                 // Notify the user about the incorrect API key
                 throw new Error('You are sending requests too quickly. Please pace your requests or read OpenAI\'s Rate limit guide.');
             } else if (error.message.includes('You exceeded your current quota, please check your plan and billing details')) {
-                // Notify the user about the incorrect API key
+                // Notify the user about running out of credits
                 throw new Error('You have run out of OpenAI credits or hit your maximum monthly spend.');
             } else if (error.message.includes('The server had an error while processing your request')) {
-                // Notify the user about the incorrect API key
+                // Notify the user about an issue with OpenAI's servers
                 throw new Error('Issue on OpenAI\'s servers. Please retry your request after a brief wait.');
             } else if (error.message.includes('The engine is currently overloaded, please try again later')) {
-                // Notify the user about the incorrect API key
+                // Notify the user about an issue with OpenAI's servers
                 throw new Error('OpenAI\'s servers are experiencing high traffic. Please retry your requests after a brief wait.');
             } else if (error.message.includes('Please reduce the length')) {
-                // Notify the user about the incorrect API key
+                // Notify the user about the context length being too large
                 throw new Error('Your document is too long. Please reduce the length of your document.');
+            } else if (error.message.includes('Invalid URL')) {
+                // Notify the user about the incorrect custom base URL
+                throw new Error('Invalid custom base URL provided. Please check your custom base URL.');
+            } else if (error.message.includes('Connection error') && this.baseURL !== null) {
+                // Notify the user about the incorrect custom base URL
+                throw new Error('Could not connect to custom base URL provided. Please check your custom base URL.');
             } else {
                 throw new Error('Error while generating tags.');
             }
