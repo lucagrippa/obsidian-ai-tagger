@@ -2,6 +2,7 @@ import { getAllTags, Notice } from 'obsidian';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { ChatOpenAI } from "@langchain/openai";
+import { ChatAnthropicTools } from "@langchain/anthropic/experimental";
 import { JsonOutputKeyToolsParser, JsonOutputKeyToolsParserParams } from "@langchain/core/output_parsers/openai_tools";
 import { Runnable } from '@langchain/core/runnables';
 import {
@@ -33,12 +34,14 @@ export class LLM {
     baseURL: string | null;
     modelName: string;
     openAIApiKey: string;
+    anthropicApiKey: string;
     chain: Runnable;
 
-    constructor(modelName: string, openAIApiKey: string, baseURL: string | null = null) {
+    constructor(modelName: string, openAIApiKey: string, anthropicApiKey: string, baseURL: string | null = null) {
         this.baseURL = baseURL;
         this.modelName = modelName;
         this.openAIApiKey = openAIApiKey;
+        this.anthropicApiKey = anthropicApiKey;
         const prompt: ChatPromptTemplate = this.getPrompt();
         const functionCallingModel = this.getModel();
 
@@ -77,15 +80,32 @@ export class LLM {
         });
 
         try {
-            const llm = new ChatOpenAI({
-                temperature: 0,
-                modelName: this.modelName,
-                openAIApiKey: this.openAIApiKey,
-                configuration: {
-                    baseURL: this.baseURL,
-                    timeout: 10000, // 10 seconds
-                }
-            });
+            let llm;
+            // check if model is "gpt-4" or "gpt-3.5-turbo", use the OpenAI API
+            if (this.modelName.includes("gpt-4") || this.modelName.includes("gpt-3.5-turbo")) {
+                llm = new ChatOpenAI({
+                    temperature: 0,
+                    modelName: this.modelName,
+                    openAIApiKey: this.openAIApiKey,
+                    configuration: {
+                        baseURL: this.baseURL,
+                        timeout: 10000, // 10 seconds
+                    }
+                });
+                
+            } else if (this.modelName.includes("opus") || this.modelName.includes("haiku") || this.modelName.includes("sonnet")) {
+                // check if model is "opus" or "haiku", use the Anthropic API
+                llm = new ChatAnthropicTools({
+                    temperature: 0.0,
+                    modelName: this.modelName,
+                    anthropicApiKey: this.anthropicApiKey,
+                });
+            } else {
+                // Handle unsupported models or provide a default behavior
+                console.error('Unsupported model:', this.modelName);
+                throw new Error('Unsupported model: ' + this.modelName);
+            }
+            
             
             // Binding "function_call" below makes the model always call the specified function.
             // If you want to allow the model to call functions selectively, omit it.
@@ -110,13 +130,16 @@ export class LLM {
 
             return llmWithTools;
         } catch (error) {
-            if (error.message.includes('OpenAI or Azure OpenAI API key not found at new ChatOpenAI')) {
+            if (error.message.includes('OpenAI or Azure OpenAI API key not found')) {
                 // Notify the user about the incorrect API key
-                throw new Error('Incorrect API key. Please check your API key.');
+                throw new Error('Incorrect OpenAI API key. Please check your API key.');
+            } else if (error.message.includes('Anthropic API key not found')) {
+                // Notify the user about the incorrect API key
+                throw new Error('Incorrect Anthropic API key. Please check your API key.');
             }
+            console.error('Error while instantiating model:', error.message);
+            throw new Error('Error while instantiating model.');
         }
-
-
     }
 
     formatTagsString(tags: string[], newTags: string[]) {
@@ -173,6 +196,7 @@ export class LLM {
         // get every tag in the current vault
         const vaultTags = getVaultTags()
         // create a string of tags to insert into the prompt as a list
+        // TODO: Add a check for empty tags and for the case where there are too many tags that it fills the context window
         let tagsString = ""
         vaultTags.forEach(tag => {
             tagsString += "- " + tag + "\n"
@@ -183,7 +207,6 @@ export class LLM {
                 tagsString: tagsString,
                 document: documentText,
             });
-            console.log("LLM RESPONSE:", response)
 
             const tags = this.formatTagsString(response.tags, response.newTags)
             return tags
@@ -217,10 +240,11 @@ export class LLM {
             } else if (error.message.includes('Invalid URL')) {
                 // Notify the user about the incorrect custom base URL
                 throw new Error('Invalid custom base URL provided. Please check your custom base URL.');
-            } else if (error.message.includes('Connection error') && this.baseURL !== null) {
+            } else if (error.message.includes('Connection error') && this.baseURL !== null && (this.modelName.includes('gpt-4') || this.modelName.includes('gpt-3.5-turbo'))) {
                 // Notify the user about the incorrect custom base URL
                 throw new Error('Could not connect to custom base URL provided. Please check your custom base URL.');
             } else {
+                console.error('Error while generating tags:', error.message);
                 throw new Error('Error while generating tags.');
             }
 

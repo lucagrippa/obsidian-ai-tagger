@@ -32,12 +32,29 @@ export class AiTaggerSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerElement)
+            .setName('Anthropic API Key')
+            .setDesc('Your API key for Anthropic')
+            .addText(text =>
+                text
+                    .setPlaceholder('Enter API key')
+                    .setValue(this.plugin.settings.anthropic_api_key)
+                    // Update the settings object whenever the value of the text field changes, and then save it to disk:
+                    .onChange(async (value) => {
+                        this.plugin.settings.anthropic_api_key = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        new Setting(containerElement)
             .setName('Model')
-            .setDesc('Pick the model you would like to use from OpenAI')
+            .setDesc('Pick the model you would like to use')
             .addDropdown(dropDown => {
                 dropDown.addOptions({
-                    'gpt-4': 'GPT-4',
-                    'gpt-3.5-turbo': 'GPT-3.5-Turbo',
+                    'gpt-4': 'OpenAI GPT-4',
+                    'gpt-3.5-turbo': 'OpenAI GPT-3.5-Turbo',
+                    'claude-3-opus-20240229': 'Anthropic Claude 3 Opus',
+                    'claude-3-sonnet-20240229': 'Anthropic Claude 3 Sonnet',
+                    'claude-3-haiku-20240307': 'Anthropic Claude 3 Haiku',
                 });
                 dropDown.setValue(this.plugin.settings.model); // Set the value here
                 dropDown.onChange(async (value) => {

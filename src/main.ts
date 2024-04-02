@@ -8,6 +8,7 @@ import * as yaml from "js-yaml";
 // while the plugin is enabled you can access these settings from the settings member variable
 interface AiTaggerSettings {
 	openai_api_key: string;
+	anthropic_api_key: string;
 	model: string;
 	custom_base_url: string;
 }
@@ -32,7 +33,6 @@ export default class AiTagger extends Plugin {
 	async saveSettings() {
 		// loadData() and saveData() provide an easy way to store and retrieve data from disk.
 		await this.saveData(this.settings);
-		this.llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
 	}
 
 	async tagDocument(documentContents: string, editor: Editor, llm: LLM) {
@@ -153,20 +153,26 @@ export default class AiTagger extends Plugin {
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
-			// check if API key is set
-			if (this.settings.openai_api_key === "") {
-				new Notice("Please set your OpenAI API key in the settings.");
+			console.log("Model: ", this.settings.model)
+			console.log("OpenAI API key: ", this.settings.openai_api_key)
+			console.log("Anthropic API key: ", this.settings.anthropic_api_key)
+
+			// check if model contains "OpenAI" and API key is not empty and then check if model contains "Anthropic" and API key is not empty
+			if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openai_api_key === "" || this.settings.openai_api_key === undefined || this.settings.openai_api_key === null)) {
+				new Notice("Please set your OpenAI API key in the plugin settings.");
+				return;
+			} else if ((this.settings.model.includes("opus") || this.settings.model.includes("haiku") || this.settings.model.includes("sonnet")) && (this.settings.anthropic_api_key === "" || this.settings.anthropic_api_key === undefined || this.settings.anthropic_api_key === null)) {
+				new Notice("Please set your Anthropic API key in the plugin settings.");
 				return;
 			}
-			
+
 			try {
-				// instantiate LLM class
-
 				// print custom base url and type 
-				console.log("Custom Base URL:", this.settings.custom_base_url)
-				console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
+				// console.log("Custom Base URL:", this.settings.custom_base_url)
+				// console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
 
-				let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
+				// instantiate LLM class
+				let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.anthropic_api_key, this.settings.custom_base_url);
 
 				// Called when the user clicks the icon.
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -191,9 +197,12 @@ export default class AiTagger extends Plugin {
 			id: 'generate-tags',
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				// check if API key is set
-				if (this.settings.openai_api_key === "") {
-					new Notice("Please set your OpenAI API key in the settings.");
+				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Anthropic" and API key is not empty
+				if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openai_api_key === "" || this.settings.openai_api_key === undefined || this.settings.openai_api_key === null)) {
+					new Notice("Please set your OpenAI API key in the plugin settings.");
+					return;
+				} else if ((this.settings.model.includes("opus") || this.settings.model.includes("haiku") || this.settings.model.includes("sonnet")) && (this.settings.anthropic_api_key === "" || this.settings.anthropic_api_key === undefined || this.settings.anthropic_api_key === null)) {
+					new Notice("Please set your Anthropic API key in the plugin settings.");
 					return;
 				}
 

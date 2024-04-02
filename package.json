@@ -23,8 +23,9 @@
 		"typescript": "5.3.3"
 	},
 	"dependencies": {
+		"@langchain/anthropic": "^0.1.9",
 		"js-yaml": "^4.1.0",
-		"langchain": "^0.1.28",
+		"langchain": "^0.1.30",
 		"openai": "^4.28.0"
 	}
 }
