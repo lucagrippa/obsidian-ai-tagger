@@ -23,24 +23,24 @@ export class AiTaggerSettingTab extends PluginSettingTab {
             .addText(text =>
                 text
                     .setPlaceholder('Enter API key')
-                    .setValue(this.plugin.settings.openai_api_key)
+                    .setValue(this.plugin.settings.openAIApiKey)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
-                        this.plugin.settings.openai_api_key = value;
+                        this.plugin.settings.openAIApiKey = value;
                         await this.plugin.saveSettings();
                     })
             );
 
         new Setting(containerElement)
-            .setName('Anthropic API Key')
-            .setDesc('Your API key for Anthropic')
+            .setName('Mistral AI API Key')
+            .setDesc('Your API key for Mistral AI')
             .addText(text =>
                 text
                     .setPlaceholder('Enter API key')
-                    .setValue(this.plugin.settings.anthropic_api_key)
+                    .setValue(this.plugin.settings.mistralAIApiKey)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
-                        this.plugin.settings.anthropic_api_key = value;
+                        this.plugin.settings.mistralAIApiKey = value;
                         await this.plugin.saveSettings();
                     })
             );
@@ -52,9 +52,11 @@ export class AiTaggerSettingTab extends PluginSettingTab {
                 dropDown.addOptions({
                     'gpt-4': 'OpenAI GPT-4',
                     'gpt-3.5-turbo': 'OpenAI GPT-3.5-Turbo',
-                    'claude-3-opus-20240229': 'Anthropic Claude 3 Opus',
-                    'claude-3-sonnet-20240229': 'Anthropic Claude 3 Sonnet',
-                    'claude-3-haiku-20240307': 'Anthropic Claude 3 Haiku',
+                    'open-mistral-7b': 'Mistral AI Mistral 7B',
+                    'open-mixtral-8x7b': 'Mistral AI Mixtral 8x7B',
+                    'mistral-small-latest': 'Mistral AI Mistral Small',
+                    'mistral-medium-latest': 'Mistral AI Mistral Medium',
+                    'mistral-large-latest': 'Mistral AI Mistral Large',
                 });
                 dropDown.setValue(this.plugin.settings.model); // Set the value here
                 dropDown.onChange(async (value) => {
