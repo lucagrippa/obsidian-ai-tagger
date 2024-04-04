@@ -23,24 +23,24 @@ export class AiTaggerSettingTab extends PluginSettingTab {
             .addText(text =>
                 text
                     .setPlaceholder('Enter API key')
-                    .setValue(this.plugin.settings.openai_api_key)
+                    .setValue(this.plugin.settings.openAIApiKey)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
-                        this.plugin.settings.openai_api_key = value;
+                        this.plugin.settings.openAIApiKey = value;
                         await this.plugin.saveSettings();
                     })
             );
 
         new Setting(containerElement)
-            .setName('Anthropic API Key')
-            .setDesc('Your API key for Anthropic')
+            .setName('Groq API Key')
+            .setDesc('Your API key for Groq')
             .addText(text =>
                 text
                     .setPlaceholder('Enter API key')
-                    .setValue(this.plugin.settings.anthropic_api_key)
+                    .setValue(this.plugin.settings.groqApiKey)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
-                        this.plugin.settings.anthropic_api_key = value;
+                        this.plugin.settings.groqApiKey = value;
                         await this.plugin.saveSettings();
                     })
             );
@@ -52,9 +52,9 @@ export class AiTaggerSettingTab extends PluginSettingTab {
                 dropDown.addOptions({
                     'gpt-4': 'OpenAI GPT-4',
                     'gpt-3.5-turbo': 'OpenAI GPT-3.5-Turbo',
-                    'claude-3-opus-20240229': 'Anthropic Claude 3 Opus',
-                    'claude-3-sonnet-20240229': 'Anthropic Claude 3 Sonnet',
-                    'claude-3-haiku-20240307': 'Anthropic Claude 3 Haiku',
+                    'llama2-70b-4096': 'Groq LLaMA2 70b',
+                    'mixtral-8x7b-32768': 'Groq Mixtral 8x7b',
+                    'gemma-7b-it': 'Groq Gemma 7b',
                 });
                 dropDown.setValue(this.plugin.settings.model); // Set the value here
                 dropDown.onChange(async (value) => {

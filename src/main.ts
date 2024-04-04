@@ -7,8 +7,8 @@ import * as yaml from "js-yaml";
 // this tells me what settings I want the user to be able to configure
 // while the plugin is enabled you can access these settings from the settings member variable
 interface AiTaggerSettings {
-	openai_api_key: string;
-	anthropic_api_key: string;
+	openAIApiKey: string;
+	groqApiKey: string;
 	model: string;
 	custom_base_url: string;
 }
@@ -154,15 +154,15 @@ export default class AiTagger extends Plugin {
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
 			console.log("Model: ", this.settings.model)
-			console.log("OpenAI API key: ", this.settings.openai_api_key)
-			console.log("Anthropic API key: ", this.settings.anthropic_api_key)
+			console.log("OpenAI API key: ", this.settings.openAIApiKey)
+			console.log("Groq API key: ", this.settings.groqApiKey)
 
-			// check if model contains "OpenAI" and API key is not empty and then check if model contains "Anthropic" and API key is not empty
-			if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openai_api_key === "" || this.settings.openai_api_key === undefined || this.settings.openai_api_key === null)) {
+			// check if model contains "OpenAI" and API key is not empty and then check if model contains "Groq" and API key is not empty
+			if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openAIApiKey === "" || this.settings.openAIApiKey === undefined || this.settings.openAIApiKey === null)) {
 				new Notice("Please set your OpenAI API key in the plugin settings.");
 				return;
-			} else if ((this.settings.model.includes("opus") || this.settings.model.includes("haiku") || this.settings.model.includes("sonnet")) && (this.settings.anthropic_api_key === "" || this.settings.anthropic_api_key === undefined || this.settings.anthropic_api_key === null)) {
-				new Notice("Please set your Anthropic API key in the plugin settings.");
+			} else if ((this.settings.model.includes("llama2-70b-4096") || this.settings.model.includes("mixtral-8x7b-32768") || this.settings.model.includes("gemma-7b-it")) && (this.settings.groqApiKey === "" || this.settings.groqApiKey === undefined || this.settings.groqApiKey === null)) {
+				new Notice("Please set your Groq API key in the plugin settings.");
 				return;
 			}
 
@@ -172,7 +172,7 @@ export default class AiTagger extends Plugin {
 				// console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
 
 				// instantiate LLM class
-				let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.anthropic_api_key, this.settings.custom_base_url);
+				let llm = new LLM(this.settings.model, this.settings.openAIApiKey, this.settings.groqApiKey, this.settings.custom_base_url);
 
 				// Called when the user clicks the icon.
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -197,18 +197,18 @@ export default class AiTagger extends Plugin {
 			id: 'generate-tags',
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Anthropic" and API key is not empty
-				if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openai_api_key === "" || this.settings.openai_api_key === undefined || this.settings.openai_api_key === null)) {
+				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Groq" and API key is not empty
+				if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openAIApiKey === "" || this.settings.openAIApiKey === undefined || this.settings.openAIApiKey === null)) {
 					new Notice("Please set your OpenAI API key in the plugin settings.");
 					return;
-				} else if ((this.settings.model.includes("opus") || this.settings.model.includes("haiku") || this.settings.model.includes("sonnet")) && (this.settings.anthropic_api_key === "" || this.settings.anthropic_api_key === undefined || this.settings.anthropic_api_key === null)) {
-					new Notice("Please set your Anthropic API key in the plugin settings.");
+				} else if ((this.settings.model.includes("mistral") || this.settings.model.includes("mixtral")) && (this.settings.groqApiKey === "" || this.settings.groqApiKey === undefined || this.settings.groqApiKey === null)) {
+					new Notice("Please set your Groq API key in the plugin settings.");
 					return;
 				}
 
 				try {
 					// instantiate LLM class
-					let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
+					let llm = new LLM(this.settings.model, this.settings.openAIApiKey, this.settings.groqApiKey, this.settings.custom_base_url);
 
 					// get current selection as a string
 					let selection = editor.getSelection();

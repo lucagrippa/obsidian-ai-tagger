@@ -2,7 +2,7 @@ import { getAllTags, Notice } from 'obsidian';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatAnthropicTools } from "@langchain/anthropic/experimental";
+import { ChatGroq } from "@langchain/groq";
 import { JsonOutputKeyToolsParser, JsonOutputKeyToolsParserParams } from "@langchain/core/output_parsers/openai_tools";
 import { Runnable } from '@langchain/core/runnables';
 import {
@@ -34,14 +34,14 @@ export class LLM {
     baseURL: string | null;
     modelName: string;
     openAIApiKey: string;
-    anthropicApiKey: string;
+    groqApiKey: string;
     chain: Runnable;
 
-    constructor(modelName: string, openAIApiKey: string, anthropicApiKey: string, baseURL: string | null = null) {
+    constructor(modelName: string, openAIApiKey: string, groqApiKey: string, baseURL: string | null = null) {
         this.baseURL = baseURL;
         this.modelName = modelName;
         this.openAIApiKey = openAIApiKey;
-        this.anthropicApiKey = anthropicApiKey;
+        this.groqApiKey = groqApiKey;
         const prompt: ChatPromptTemplate = this.getPrompt();
         const functionCallingModel = this.getModel();
 
@@ -80,10 +80,10 @@ export class LLM {
         });
 
         try {
-            let llm;
+            let llmWithTools;
             // check if model is "gpt-4" or "gpt-3.5-turbo", use the OpenAI API
             if (this.modelName.includes("gpt-4") || this.modelName.includes("gpt-3.5-turbo")) {
-                llm = new ChatOpenAI({
+                const llm = new ChatOpenAI({
                     temperature: 0,
                     modelName: this.modelName,
                     openAIApiKey: this.openAIApiKey,
@@ -92,50 +92,65 @@ export class LLM {
                         timeout: 10000, // 10 seconds
                     }
                 });
-                
-            } else if (this.modelName.includes("opus") || this.modelName.includes("haiku") || this.modelName.includes("sonnet")) {
-                // check if model is "opus" or "haiku", use the Anthropic API
-                llm = new ChatAnthropicTools({
+
+                // Binding "function_call" below makes the model always call the specified function.
+                // If you want to allow the model to call functions selectively, omit it.
+                llmWithTools = llm.bind({
+                    tools: [
+                        {
+                            type: "function" as const,
+                            function: {
+                                name: "document_tagger",
+                                description: "Should always be used to tag documents.",
+                                parameters: zodToJsonSchema(zodSchema),
+                            },
+                        }
+                    ],
+                    tool_choice: "auto"
+                });
+
+            } else if (this.modelName.includes("llama2-70b-4096") || this.modelName.includes("mixtral-8x7b-32768") || this.modelName.includes("gemma-7b-it")) {
+                // check if model contains "llama2-70b-4096" or "mixtral-8x7b-32768" or "gemma-7b-it", use the Groq API
+                const llm = new ChatGroq({
                     temperature: 0.0,
                     modelName: this.modelName,
-                    anthropicApiKey: this.anthropicApiKey,
+                    apiKey: this.groqApiKey,
+                });
+
+                // Binding "function_call" below makes the model always call the specified function.
+                // If you want to allow the model to call functions selectively, omit it.
+                llmWithTools = llm.bind({
+                    tools: [
+                        {
+                            type: "function" as const,
+                            function: {
+                                name: "document_tagger",
+                                description: "Should always be used to tag documents.",
+                                parameters: zodToJsonSchema(zodSchema),
+                            },
+                        }
+                    ],
+                    tool_choice: {
+                        type: "function" as const,
+                        function: {
+                            name: "document_tagger",
+                        },
+                    },
                 });
             } else {
                 // Handle unsupported models or provide a default behavior
                 console.error('Unsupported model:', this.modelName);
                 throw new Error('Unsupported model: ' + this.modelName);
             }
-            
-            
-            // Binding "function_call" below makes the model always call the specified function.
-            // If you want to allow the model to call functions selectively, omit it.
-            const llmWithTools = llm.bind({
-                tools: [
-                    {
-                        type: "function" as const,
-                        function: {
-                            name: "document_tagger",
-                            description: "Should always be used to tag documents.",
-                            parameters: zodToJsonSchema(zodSchema),
-                        },
-                    }
-                ],
-                tool_choice: {
-                    type: "function" as const,
-                    function: {
-                        name: "document_tagger",
-                    },
-                },
-            });
 
             return llmWithTools;
         } catch (error) {
             if (error.message.includes('OpenAI or Azure OpenAI API key not found')) {
                 // Notify the user about the incorrect API key
                 throw new Error('Incorrect OpenAI API key. Please check your API key.');
-            } else if (error.message.includes('Anthropic API key not found')) {
+            } else if (error.message.includes('Groq API key not found')) {
                 // Notify the user about the incorrect API key
-                throw new Error('Incorrect Anthropic API key. Please check your API key.');
+                throw new Error('Incorrect Groq API key. Please check your API key.');
             }
             console.error('Error while instantiating model:', error.message);
             throw new Error('Error while instantiating model.');

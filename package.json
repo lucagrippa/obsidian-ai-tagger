@@ -24,6 +24,8 @@
 	},
 	"dependencies": {
 		"@langchain/anthropic": "^0.1.9",
+		"@langchain/groq": "^0.0.6",
+		"@langchain/mistralai": "^0.0.16",
 		"js-yaml": "^4.1.0",
 		"langchain": "^0.1.30",
 		"openai": "^4.28.0"
