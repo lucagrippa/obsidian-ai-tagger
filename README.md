@@ -5,9 +5,19 @@ The plugin analyzes the current document that you have open in the editor and al
 
 ## How to use
 
+### Supported LLM Providers
+**OpenAI**
+- `GPT-3.5-Turbo`
+- `GPT-4`
+
+**Anthropic**
+- `Claude 3 Opus`
+- `Claude 3 Sonnet`
+- `Claude 3 Haiku`
+
 ### Setting up the AI Tagger
-- Enter your OpenAI API key in the settings tab. (If you do not have one you can create one at [OpenAI](https://platform.openai.com/account/api-keys))
-- Pick the model (LLM) that you would like to use `GPT-3.5-Turbo` or `GPT-4`
+- Enter your LLM provider API key in the settings tab. 
+- Pick the model (LLM) that you would like to use
 
 ### One click tagging
 - the simplest way to use the plugin is from the ribbon located on the left sidebar.
