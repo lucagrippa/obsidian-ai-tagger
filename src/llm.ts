@@ -11,23 +11,8 @@ import {
     HumanMessagePromptTemplate,
 } from "@langchain/core/prompts";
 
-
-function getVaultTags() {
-    const tagsSet = new Set(); // Use a set to ensure unique tags
-
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-        const cache = this.app.metadataCache.getFileCache(file)
-        const tags = getAllTags(cache);
-        if (tags !== null) {
-            for (const tag of tags) {
-                tagsSet.add(tag);
-            }
-        }
-    }
-
-    return tagsSet;
-}
+import { getVaultTags } from './helpers/get_tags';
+import { models } from './models';
 
 // write a class to instantiate the chain and handle the prompts
 export class LLM {
@@ -134,7 +119,13 @@ export class LLM {
                             },
                         }
                     ],
-                    // tool_choice: "auto",
+                    tool_choice: "any",
+                    // tool_choice: {
+                    //     type: "function" as const,
+                    //     function: {
+                    //         name: "document_tagger",
+                    //     },
+                    // },
                 });
             } else {
                 // Handle unsupported models or provide a default behavior
