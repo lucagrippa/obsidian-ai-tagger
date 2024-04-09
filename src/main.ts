@@ -1,12 +1,13 @@
 import { Editor, MarkdownView, Notice, Plugin, getFrontMatterInfo } from 'obsidian';
 import { AiTaggerSettingTab } from "./settings";
 import { LLM } from "./llm";
+import { checkModelAndApiKey } from './helpers/check_model';
 import * as yaml from "js-yaml";
 
 // my settings definition
 // this tells me what settings I want the user to be able to configure
 // while the plugin is enabled you can access these settings from the settings member variable
-interface AiTaggerSettings {
+export interface AiTaggerSettings {
 	openAIApiKey: string;
 	mistralAIApiKey: string;
 	model: string;
@@ -36,6 +37,7 @@ export default class AiTagger extends Plugin {
 	}
 
 	async tagDocument(documentContents: string, editor: Editor, llm: LLM) {
+		// get content
 		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(documentContents);
 
 		let content: string = documentContents.substring(contentStart);
@@ -76,6 +78,7 @@ export default class AiTagger extends Plugin {
 	}
 
 	async tagSelection(selection: string, editor: Editor, llm: LLM) {
+		// get content
 		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(selection);
 
 		let content: string = selection.substring(contentStart);
@@ -157,19 +160,10 @@ export default class AiTagger extends Plugin {
 			console.log("OpenAI API key: ", this.settings.openAIApiKey)
 			console.log("Mistral AI API key: ", this.settings.mistralAIApiKey)
 
-			// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
-			if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openAIApiKey === "" || this.settings.openAIApiKey === undefined || this.settings.openAIApiKey === null)) {
-				new Notice("Please set your OpenAI API key in the plugin settings.");
-				return;
-			} else if ((this.settings.model.includes("open-mistral-7b") || this.settings.model.includes("open-mixtral-8x7b") || this.settings.model.includes("mistral-small-latest") || this.settings.model.includes("mistral-medium-latest") || this.settings.model.includes("mistral-large-latest")) && (this.settings.mistralAIApiKey === "" || this.settings.mistralAIApiKey === undefined || this.settings.mistralAIApiKey === null)) {
-				new Notice("Please set your Mistral AI API key in the plugin settings.");
-				return;
-			}
-
+			
 			try {
-				// print custom base url and type 
-				// console.log("Custom Base URL:", this.settings.custom_base_url)
-				// console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
+				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
+				checkModelAndApiKey(this.settings);
 
 				// instantiate LLM class
 				let llm = new LLM(this.settings.model, this.settings.openAIApiKey, this.settings.mistralAIApiKey, this.settings.custom_base_url);
@@ -197,16 +191,11 @@ export default class AiTagger extends Plugin {
 			id: 'generate-tags',
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
-				if ((this.settings.model.includes("gpt-4") || this.settings.model.includes("gpt-3.5-turbo")) && (this.settings.openAIApiKey === "" || this.settings.openAIApiKey === undefined || this.settings.openAIApiKey === null)) {
-					new Notice("Please set your OpenAI API key in the plugin settings.");
-					return;
-				} else if ((this.settings.model.includes("open-mistral-7b") || this.settings.model.includes("open-mixtral-8x7b") || this.settings.model.includes("mistral-small-latest") || this.settings.model.includes("mistral-medium-latest") || this.settings.model.includes("mistral-large-latest")) && (this.settings.mistralAIApiKey === "" || this.settings.mistralAIApiKey === undefined || this.settings.mistralAIApiKey === null)) {
-					new Notice("Please set your Mistral AI API key in the plugin settings.");
-					return;
-				}
-
+				
 				try {
+					// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
+					checkModelAndApiKey(this.settings);
+					
 					// instantiate LLM class
 					let llm = new LLM(this.settings.model, this.settings.openAIApiKey, this.settings.custom_base_url);
 
