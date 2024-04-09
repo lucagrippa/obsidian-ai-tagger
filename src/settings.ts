@@ -1,5 +1,10 @@
 import AiTagger from "./main";
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { OPENAI, MISTRAL_AI, models } from './models';
+
+interface ModelsObject {
+    [key: string]: string;
+}
 
 export class AiTaggerSettingTab extends PluginSettingTab {
     plugin: AiTagger;
@@ -45,19 +50,16 @@ export class AiTaggerSettingTab extends PluginSettingTab {
                     })
             );
 
+        const modelsObject: ModelsObject = {};
+        for (let model of models) {
+            modelsObject[model.modelId] = `${model.company} ${model.modelName}`;
+        }
+
         new Setting(containerElement)
             .setName('Model')
             .setDesc('Pick the model you would like to use')
             .addDropdown(dropDown => {
-                dropDown.addOptions({
-                    'gpt-4': 'OpenAI GPT-4',
-                    'gpt-3.5-turbo': 'OpenAI GPT-3.5-Turbo',
-                    'open-mistral-7b': 'Mistral AI Mistral 7B',
-                    'open-mixtral-8x7b': 'Mistral AI Mixtral 8x7B',
-                    'mistral-small-latest': 'Mistral AI Mistral Small',
-                    'mistral-medium-latest': 'Mistral AI Mistral Medium',
-                    'mistral-large-latest': 'Mistral AI Mistral Large',
-                });
+                dropDown.addOptions(modelsObject);
                 dropDown.setValue(this.plugin.settings.model); // Set the value here
                 dropDown.onChange(async (value) => {
                     this.plugin.settings.model = value;
