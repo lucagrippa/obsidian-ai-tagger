@@ -1,3 +1,4 @@
+import { Notice } from 'obsidian';
 
 export const OPENAI = "OpenAI";
 export const MISTRAL_AI = "Mistral AI";
@@ -5,7 +6,16 @@ export const MISTRAL_AI = "Mistral AI";
 export const OPEN_SOURCE = "open-source";
 export const CLOSED_SOURCE = "closed-source";
 
-export const models = [
+export interface ModelInfo {
+    company: string;
+    modelName: string;
+    modelId: string;
+    tokenLimit: number;
+    type: string;
+    toolUse: boolean;
+}
+
+export const models: Array<ModelInfo> = [
     {
         "company": OPENAI,
         "modelName": "GPT-4",
@@ -22,22 +32,22 @@ export const models = [
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
-    {
-        "company": MISTRAL_AI,
-        "modelName": "Mistral 7B",
-        "modelId": "mistral-tiny-2312",
-        "tokenLimit": 32768,
-        "type": OPEN_SOURCE,
-        "toolUse": true
-    },
-    {
-        "company": MISTRAL_AI,
-        "modelName": "Mixtral 8x7B",
-        "modelId": "mistral-small-2312",
-        "tokenLimit": 32768,
-        "type": OPEN_SOURCE,
-        "toolUse": true
-    },
+    // {
+    //     "company": MISTRAL_AI,
+    //     "modelName": "Mistral 7B",
+    //     "modelId": "mistral-tiny-2312",
+    //     "tokenLimit": 32768,
+    //     "type": OPEN_SOURCE,
+    //     "toolUse": true
+    // },
+    // {
+    //     "company": MISTRAL_AI,
+    //     "modelName": "Mixtral 8x7B",
+    //     "modelId": "mistral-small-2312",
+    //     "tokenLimit": 32768,
+    //     "type": OPEN_SOURCE,
+    //     "toolUse": true
+    // },
     {
         "company": MISTRAL_AI,
         "modelName": "Mistral Small",
@@ -46,14 +56,14 @@ export const models = [
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
-    {
-        "company": MISTRAL_AI,
-        "modelName": "Mistral Medium",
-        "modelId": "mistral-medium-2312",
-        "tokenLimit": 32768,
-        "type": CLOSED_SOURCE,
-        "toolUse": true
-    },
+    // {
+    //     "company": MISTRAL_AI,
+    //     "modelName": "Mistral Medium",
+    //     "modelId": "mistral-medium-2312",
+    //     "tokenLimit": 32768,
+    //     "type": CLOSED_SOURCE,
+    //     "toolUse": false
+    // },
     {
         "company": MISTRAL_AI,
         "modelName": "Mistral Large",
@@ -63,3 +73,36 @@ export const models = [
         "toolUse": true
     }
 ];
+
+export function getModelbyId(modelId: string) {
+    const model = models.find((model) => model.modelId === modelId);
+    
+    if (!model) {
+        throw new Error(`Model ${modelId} is not supported.`);
+    }
+
+    return model;
+}
+
+export function getModelTokenLimit(modelId: string) {
+    try {
+        const model = getModelbyId(modelId);
+        return model.tokenLimit;
+    } catch (error) {
+        console.error('Error while getting model token limit:', error);
+        throw error
+    }    
+}
+
+export function isTextWithinLimit(prompt: string, text: string, modelName: string) {
+    // Define token limits for the models
+    const tokenLimit = getModelTokenLimit(modelName);
+
+    // Calculate the number of tokens based on average token length (4 characters)
+    const promptTokens = prompt.length / 4;
+    const textTokens = text.length / 4;
+
+    const totalTokens = promptTokens + textTokens;
+
+    return totalTokens <= tokenLimit;
+}
