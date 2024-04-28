@@ -24,9 +24,10 @@
 	},
 	"dependencies": {
 		"@langchain/anthropic": "^0.1.9",
-		"@langchain/mistralai": "^0.0.16",
+		"@langchain/mistralai": "^0.0.19",
+		"@langchain/openai": "^0.0.28",
 		"js-yaml": "^4.1.0",
-		"langchain": "^0.1.30",
+		"langchain": "^0.1.36",
 		"openai": "^4.28.0"
 	}
 }
