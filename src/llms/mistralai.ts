@@ -1,4 +1,5 @@
 import { ChatMistralAI } from "@langchain/mistralai";
+import type { ToolChoice } from "@mistralai/mistralai";
 import { Runnable } from '@langchain/core/runnables';
 import {
     ChatPromptTemplate,
@@ -70,7 +71,7 @@ Tag the users document based on its content. You can use between 1 and 5 of the 
             const modelWithTool: Runnable = model.bind({
                 tools: [tagDocumentTool],
                 // Input should be 'auto', 'none' or 'any'
-                tool_choice: "any"
+                tool_choice: 'any' as ToolChoice
             });
 
             const outputParser: Runnable = new JsonOutputKeyToolsParser({
