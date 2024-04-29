@@ -1,13 +1,15 @@
-import { Editor, MarkdownView, Notice, Plugin, getFrontMatterInfo } from 'obsidian';
+import { Editor, FrontMatterInfo, MarkdownView, Notice, Plugin, Workspace, TFile, Vault, getFrontMatterInfo } from 'obsidian';
+
 import { AiTaggerSettingTab } from "./settings";
-import { LLM } from "./llm";
-import * as yaml from "js-yaml";
+import { LLM } from "./llms/base";
+import { getLlm } from './helpers/get_model';
 
 // my settings definition
 // this tells me what settings I want the user to be able to configure
 // while the plugin is enabled you can access these settings from the settings member variable
-interface AiTaggerSettings {
-	openai_api_key: string;
+export interface AiTaggerSettings {
+	openAIApiKey: string;
+	mistralAIApiKey: string;
 	model: string;
 	custom_base_url: string;
 }
@@ -32,115 +34,36 @@ export default class AiTagger extends Plugin {
 	async saveSettings() {
 		// loadData() and saveData() provide an easy way to store and retrieve data from disk.
 		await this.saveData(this.settings);
-		this.llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
 	}
 
-	async tagDocument(documentContents: string, editor: Editor, llm: LLM) {
-		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(documentContents);
+	async tagText(currentFile: TFile, text: string, llm: LLM) {
+		// contentStart will return 0 if the text does not include frontmatter
+		let { contentStart }: FrontMatterInfo = getFrontMatterInfo(text);
 
-		let content: string = documentContents.substring(contentStart);
-		console.log("Content:", content.substring(0, 30) + "...")
-
-		try {
-			// generate tags for the document using an LLM
-			const generatedTags: string = await llm.generateTags(content);
-			console.log("Generated Tags:", generatedTags)
-
-			if (exists) {
-				let yamlFrontMatter = yaml.load(frontmatter);
-
-				// Update existing "tags" property with generated tags
-				if (yamlFrontMatter.tags === undefined) {
-					yamlFrontMatter.tags = generatedTags;
-				} else {
-					yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
-				}
-
-				// write the frontmatter to the top of the document in the editor
-				const updatedFrontMatter = yaml.dump(yamlFrontMatter);
-				editor.replaceRange(
-					updatedFrontMatter,
-					editor.offsetToPos(from),
-					editor.offsetToPos(to)
-				);
-			} else {
-				// create front matter
-				const newFrontmatter = `---\ntags: ${generatedTags}\n---\n`
-				// write the frontmatter to the top of the document in the editor
-				editor.replaceRange(newFrontmatter, { line: 0, ch: 0 });
-			}
-		} catch (error) {
-			new Notice(error.message);
-			console.error('Error while generating tags:', error);
-		}
-	}
-
-	async tagSelection(selection: string, editor: Editor, llm: LLM) {
-		let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(selection);
-
-		let content: string = selection.substring(contentStart);
-		console.log("Content:", content.substring(0, 30) + "...")
+		// get contents of document excluding frontmatter
+		let content: string = text.substring(contentStart);
+		console.debug("Content:", content.substring(0, 30) + "...")
 
 		try {
+			// notify user that we are generating tags
+			new Notice("Generating tags...");
+			console.info("Generating tags...");
+
 			// generate tags for the document using an LLM
-			const generatedTags: string = await llm.generateTags(content);
-			console.log("Generated Tags:", generatedTags)
+			const generatedTags: Array<string> = await llm.generateTags(content);
+			// const generatedTags: Array<string> = ["#tag1", "#tag2"];
+			console.debug("Generated Tags:", generatedTags);
 
-			if (exists) {
-				let yamlFrontMatter = yaml.load(frontmatter);
-
-				// Update existing "tags" property with generated tags
-				if (yamlFrontMatter.tags === undefined) {
-					yamlFrontMatter.tags = generatedTags;
+			this.app.fileManager.processFrontMatter(currentFile, frontmatter => {
+				if (!frontmatter['tags']) {
+					frontmatter['tags'] = generatedTags;
 				} else {
-					yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
+					frontmatter['tags'].push(...generatedTags)
 				}
-
-				// write the frontmatter to the top of the document in the editor
-				const updatedFrontMatter = yaml.dump(yamlFrontMatter);
-				editor.replaceRange(
-					updatedFrontMatter,
-					editor.offsetToPos(from),
-					editor.offsetToPos(to)
-				);
-			} else {
-				// check to see if this is a selection that doesn't include the frontmatter of the document
-				// if so, we don't need to create new frontmatter we just need to add the tags to the current frontmatter
-				console.log("Selection with no frontmatter:", selection.substring(0, 30) + "...")
-				let fileContents: string = editor.getValue();
-				console.log("File Contents:", fileContents.substring(0, 30) + "...")
-				let { contentStart, exists, from, frontmatter, to } = getFrontMatterInfo(fileContents);
-
-				// if there is frontmatter, we need to add it
-				if (exists) {
-					let yamlFrontMatter = yaml.load(frontmatter);
-					console.log("Overall document has frontmatter:", yamlFrontMatter)
-
-					// Update existing "tags" property with generated tags
-					if (yamlFrontMatter.tags === undefined) {
-						yamlFrontMatter.tags = generatedTags;
-					} else {
-						yamlFrontMatter.tags = yamlFrontMatter.tags + " " + generatedTags;
-					}
-
-					// write the frontmatter to the top of the document in the editor
-					const updatedFrontMatter = yaml.dump(yamlFrontMatter);
-					editor.replaceRange(
-						updatedFrontMatter,
-						editor.offsetToPos(from),
-						editor.offsetToPos(to)
-					);
-				} else {
-					console.log("Overall document doesn't have frontmatter:")
-					// create front matter
-					const newFrontmatter = `---\ntags: ${generatedTags}\n---\n`
-					// write the frontmatter to the top of the document in the editor
-					editor.replaceRange(newFrontmatter, { line: 0, ch: 0 });
-				}
-			}
+			});
 		} catch (error) {
+			console.error('Error in tagText():', error);
 			new Notice(error.message);
-			console.error('Error while generating tags:', error);
 		}
 	}
 
@@ -153,27 +76,23 @@ export default class AiTagger extends Plugin {
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
-			// check if API key is set
-			if (this.settings.openai_api_key === "") {
-				new Notice("Please set your OpenAI API key in the settings.");
-				return;
-			}
-			
+			console.log("Model: ", this.settings.model)
+			console.log("OpenAI API key: ", this.settings.openAIApiKey)
+			console.log("Mistral AI API key: ", this.settings.mistralAIApiKey)
+
 			try {
+				// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
 				// instantiate LLM class
-
-				// print custom base url and type 
-				console.log("Custom Base URL:", this.settings.custom_base_url)
-				console.log("Type of Custom Base URL:", typeof this.settings.custom_base_url)
-
-				let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
+				let llm: LLM = getLlm(this.settings);
 
 				// Called when the user clicks the icon.
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
+				const workspace: Workspace = this.app.workspace
+				const markdownView: MarkdownView | null = workspace.getActiveViewOfType(MarkdownView);
+				const currentFile: TFile | null = workspace.getActiveFile();
+				if (markdownView !== null && currentFile !== null) {
 					// get current document as a string
 					let fileContents: string = markdownView.editor.getValue();
-					this.tagDocument(fileContents, markdownView.editor, llm);
+					this.tagText(currentFile, fileContents, llm);
 				} else {
 					const message = "Open and select a document to use the AI Tagger"
 					new Notice(message);
@@ -191,25 +110,24 @@ export default class AiTagger extends Plugin {
 			id: 'generate-tags',
 			name: 'Generate tags',
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				// check if API key is set
-				if (this.settings.openai_api_key === "") {
-					new Notice("Please set your OpenAI API key in the settings.");
-					return;
-				}
 
 				try {
+					// check if model contains "OpenAI" and API key is not empty and then check if model contains "Mistral AI" and API key is not empty
 					// instantiate LLM class
-					let llm = new LLM(this.settings.model, this.settings.openai_api_key, this.settings.custom_base_url);
+					let llm: LLM = getLlm(this.settings);
 
 					// get current selection as a string
-					let selection = editor.getSelection();
+					let selection: string = editor.getSelection();
+					const currentFile: TFile | null = this.app.workspace.getActiveFile();
 
-					if (selection === "") {
-						// if selection is empty, use the entire document
-						let fileContents: string = editor.getValue();
-						this.tagDocument(fileContents, editor, llm);
-					} else {
-						this.tagSelection(selection, editor, llm);
+					if (currentFile !== null) {
+						if (selection === "") {
+							// if selection is empty, use the entire document
+							let fileContents: string = editor.getValue();
+							this.tagText(currentFile, fileContents, llm);
+						} else {
+							this.tagText(currentFile, selection, llm);
+						}
 					}
 				} catch (error) {
 					new Notice(error.message);

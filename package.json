@@ -12,7 +12,6 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/js-yaml": "^3.12.5",
 		"@types/node": "^20.11.20",
 		"@typescript-eslint/eslint-plugin": "7.0.2",
 		"@typescript-eslint/parser": "7.0.2",
@@ -23,8 +22,10 @@
 		"typescript": "5.3.3"
 	},
 	"dependencies": {
-		"js-yaml": "^4.1.0",
-		"langchain": "^0.1.28",
+		"@langchain/anthropic": "^0.1.9",
+		"@langchain/mistralai": "^0.0.19",
+		"@langchain/openai": "^0.0.28",
+		"langchain": "^0.1.36",
 		"openai": "^4.28.0"
 	}
 }

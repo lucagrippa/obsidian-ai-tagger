@@ -1,5 +1,10 @@
 import AiTagger from "./main";
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { OPENAI, MISTRAL_AI, models } from './models';
+
+interface ModelsObject {
+    [key: string]: string;
+}
 
 export class AiTaggerSettingTab extends PluginSettingTab {
     plugin: AiTagger;
@@ -23,22 +28,38 @@ export class AiTaggerSettingTab extends PluginSettingTab {
             .addText(text =>
                 text
                     .setPlaceholder('Enter API key')
-                    .setValue(this.plugin.settings.openai_api_key)
+                    .setValue(this.plugin.settings.openAIApiKey)
                     // Update the settings object whenever the value of the text field changes, and then save it to disk:
                     .onChange(async (value) => {
-                        this.plugin.settings.openai_api_key = value;
+                        this.plugin.settings.openAIApiKey = value;
                         await this.plugin.saveSettings();
                     })
             );
 
         new Setting(containerElement)
+            .setName('Mistral AI API Key')
+            .setDesc('Your API key for Mistral AI')
+            .addText(text =>
+                text
+                    .setPlaceholder('Enter API key')
+                    .setValue(this.plugin.settings.mistralAIApiKey)
+                    // Update the settings object whenever the value of the text field changes, and then save it to disk:
+                    .onChange(async (value) => {
+                        this.plugin.settings.mistralAIApiKey = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        const modelsObject: ModelsObject = {};
+        for (let model of models) {
+            modelsObject[model.modelId] = `${model.company} ${model.modelName}`;
+        }
+
+        new Setting(containerElement)
             .setName('Model')
-            .setDesc('Pick the model you would like to use from OpenAI')
+            .setDesc('Pick the model you would like to use')
             .addDropdown(dropDown => {
-                dropDown.addOptions({
-                    'gpt-4': 'GPT-4',
-                    'gpt-3.5-turbo': 'GPT-3.5-Turbo',
-                });
+                dropDown.addOptions(modelsObject);
                 dropDown.setValue(this.plugin.settings.model); // Set the value here
                 dropDown.onChange(async (value) => {
                     this.plugin.settings.model = value;

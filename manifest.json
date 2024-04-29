@@ -1,7 +1,7 @@
 {
 	"id": "ai-tagger",
 	"name": "AI Tagger",
-	"version": "1.0.4",
+	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Analyze and tag your document with one click for efficient note organization using AI. OpenAI API key required",
 	"author": "Luca Grippa",
