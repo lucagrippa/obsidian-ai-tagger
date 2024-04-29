@@ -1,4 +1,3 @@
-import { Notice } from 'obsidian';
 import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputKeyToolsParser, JsonOutputKeyToolsParserParams } from "@langchain/core/output_parsers/openai_tools";
 import { Runnable } from '@langchain/core/runnables';
@@ -11,7 +10,7 @@ import {
 
 import { LLM } from './base'
 import { TagDocumentTool } from '../tool'
-import { getVaultTags } from '../helpers/get_tags';
+import { getTagsString } from '../helpers/get_tags';
 
 // write a class to instantiate the chain and handle the prompts
 export class OpenAiLLM extends LLM {
@@ -28,15 +27,18 @@ export class OpenAiLLM extends LLM {
 
     getPrompt() {
         const systemMessage = `
-    Tags are used to categorize and organize documents based on its content. Here are some existing tags that the user has created.
+You are an expert at categorizing documents using tags. Your task is to create tags for the users document. Tags are used to categorize and organize documents based on its content. The format of a tag is a pound sign followed by the category "#<category>", for example "#networking".  
+Here are some existing tags that you can use to categorize the document.
 
-    EXISTING TAGS:
-    {tagsString}
+EXISTING TAGS:
+\`\`\`
+{tagsString}
+\`\`\`
 
-    Tag the following document based on its content. You can use between 1 and 5 of the EXISTING TAGS but also create 1 to 3 new tags. Ensure that the tags accurately reflect the article's primary focus and themes.
-    `
+Tag the users document based on its content. You can use between 1 and 5 of the EXISTING TAGS but also create 1 to 3 NEW TAGS that you come up with on your own. Ensure that the tags accurately reflect the document's primary focus and themes.
+`
 
-        const humanMessage = "DOCUMENT: \n ```{document}``` \n TAGS: \n"
+        const humanMessage = "DOCUMENT:\n```{document}```"
 
         const prompt = ChatPromptTemplate.fromMessages([
             SystemMessagePromptTemplate.fromTemplate(systemMessage),
@@ -95,17 +97,10 @@ export class OpenAiLLM extends LLM {
         return model;
     }
 
-    async generateTags(documentText: string): Promise<string> {
+    async generateTags(documentText: string): Promise<Array<string>> {
         const chain: Runnable = this.prompt.pipe(this.model)
 
-        // get every tag in the current vault
-        const vaultTags = getVaultTags()
-        // create a string of tags to insert into the prompt as a list
-        // TODO: Add a check for empty tags and for the case where there are too many tags that it fills the context window
-        let tagsString = ""
-        vaultTags.forEach(tag => {
-            tagsString += "- " + tag + "\n"
-        })
+        const tagsString: string = getTagsString()
 
         try {
             const response = await chain.invoke({
@@ -113,7 +108,9 @@ export class OpenAiLLM extends LLM {
                 document: documentText,
             });
 
-            const tags = this.formatTagsString(response.tags, response.newTags)
+            console.debug("LLM Response: ", response)
+
+            const tags: Array<string> = this.formatOutputTags(response.tags, response.newTags)
             return tags
         } catch (error) {
             // print the type of error

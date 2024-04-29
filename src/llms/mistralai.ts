@@ -1,4 +1,3 @@
-import { Notice } from 'obsidian';
 import { ChatMistralAI } from "@langchain/mistralai";
 import { Runnable } from '@langchain/core/runnables';
 import {
@@ -86,7 +85,7 @@ Tag the users document based on its content. You can use between 1 and 5 of the 
         return model
     }
 
-    async generateTags(documentText: string): Promise<string> {
+    async generateTags(documentText: string): Promise<Array<string>> {
         const chain: Runnable = this.prompt.pipe(this.model)
 
         const tagsString: string = getTagsString()
@@ -96,10 +95,9 @@ Tag the users document based on its content. You can use between 1 and 5 of the 
                 tagsString: tagsString,
                 document: documentText,
             });
-            console.log("Response: ", response)
+            console.debug("LLM Response: ", response)
 
-            const tags: string = this.formatOutputTags(response.tags, response.newTags)
-            console.log("Tag String: ", tags)
+            const tags: Array<string> = this.formatOutputTags(response.tags, response.newTags)
             return tags
         } catch (error) {
             // print the type of error

@@ -35,17 +35,10 @@ export abstract class LLM {
         return totalTokens <= tokenLimit;
     }
 
-    formatOutputTags(tags: Array<string>, newTags: Array<string>) {
-        const tagsString: string = tags.join(" ")
-
-        // if there are new tags, add a separator
-        if (newTags.length > 0) {
-            const newTagsString: string = " | " + newTags.join(" ")
-            return tagsString + newTagsString
-        }
-
-        return tagsString
+    formatOutputTags(tags: Array<string>, newTags: Array<string>): Array<string> {
+        const tagsArray = [...tags, "|", ...newTags]
+        return tagsArray
     }
 
-    abstract generateTags(documentText: string): Promise<string>;
+    abstract generateTags(documentText: string): Promise<Array<string>>;
 }
