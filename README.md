@@ -9,12 +9,10 @@ The plugin analyzes the current document that you have open in the editor and al
 **OpenAI**
 - `GPT-3.5-Turbo`
 - `GPT-4`
+- `GPT-4 Turbo`
 
 **Mistral AI**
-- `Mistral 7B`
-- `Mixtral 8x7B`
 - `Mistral Small`
-- `Mistral Medium`
 - `Mistral Large`
 
 ### Setting up the AI Tagger
