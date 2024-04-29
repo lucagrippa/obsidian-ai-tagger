@@ -18,17 +18,17 @@ export interface ModelInfo {
 export const models: Array<ModelInfo> = [
     {
         "company": OPENAI,
-        "modelName": "GPT-4",
-        "modelId": "gpt-4-0613",
-        "tokenLimit": 8192,
+        "modelName": "GPT-3.5 Turbo",
+        "modelId": "gpt-3.5-turbo-0125",
+        "tokenLimit": 16385,
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
     {
         "company": OPENAI,
-        "modelName": "GPT-3.5 Turbo",
-        "modelId": "gpt-3.5-turbo-0125",
-        "tokenLimit": 16385,
+        "modelName": "GPT-4",
+        "modelId": "gpt-4-0613",
+        "tokenLimit": 8192,
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
