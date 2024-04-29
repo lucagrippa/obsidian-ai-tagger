@@ -32,6 +32,14 @@ export const models: Array<ModelInfo> = [
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
+    {
+        "company": OPENAI,
+        "modelName": "GPT-4 Turbo",
+        "modelId": "gpt-4-turbo-2024-04-09",
+        "tokenLimit": 128000,
+        "type": CLOSED_SOURCE,
+        "toolUse": true
+    },
     // {
     //     "company": MISTRAL_AI,
     //     "modelName": "Mistral 7B",
