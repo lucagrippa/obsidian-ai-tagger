@@ -31,8 +31,8 @@ export function getLlm(settings: AiTaggerSettings): LLM {
 
     if (!modelInfo) {
         throw new Error("Model not found");
-    } else if (typeof settings.mistralAIApiKey === "string" && modelInfo.company === OPENAI) {
-        if (settings.openAIApiKey.startsWith("sk")) {
+    } else if (modelInfo.company === OPENAI) {
+        if (typeof settings.openAIApiKey === "string" && settings.openAIApiKey.startsWith("sk")) {
             try {
                 const llm = new OpenAiLLM(settings.model, settings.openAIApiKey)
                 return llm
