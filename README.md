@@ -32,6 +32,10 @@ The plugin analyzes the current document that you have open in the editor and al
 
     ![Command palette tagging](images/command_palette_tagging.gif)
 
+### Lowercase Mode
+- if you prefer your tags to be in lowercase, you can enable the lowercase mode in the settings tab.
+- this mode forces every generated tag to be lowercase
+
 ## Installation
 Navigate to the Obsidian settings and search AI Tagger in the Community plugins section. You can also manually download the latest release from this repository's GitHub releases by extracting the ZIP file to your Obsidian plugins folder.
 
