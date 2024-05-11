@@ -12,6 +12,7 @@ export interface AiTaggerSettings {
 	mistralAIApiKey: string;
 	model: string;
 	custom_base_url: string;
+	lowerCaseMode: boolean;
 }
 
 const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
@@ -50,9 +51,15 @@ export default class AiTagger extends Plugin {
 			console.info("Generating tags...");
 
 			// generate tags for the document using an LLM
-			const generatedTags: Array<string> = await llm.generateTags(content);
+			let generatedTags: Array<string> = await llm.generateTags(content);
 			// const generatedTags: Array<string> = ["#tag1", "#tag2"];
 			console.debug("Generated Tags:", generatedTags);
+
+			if (this.settings.lowerCaseMode === true) {
+				for (let i = 0; i < generatedTags.length; i++) {
+					generatedTags[i] = generatedTags[i].toLowerCase()
+				}
+			}
 
 			this.app.fileManager.processFrontMatter(currentFile, frontmatter => {
 				if (!frontmatter['tags']) {
