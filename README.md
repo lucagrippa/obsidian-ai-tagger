@@ -10,6 +10,7 @@ The plugin analyzes the current document that you have open in the editor and al
 - `GPT-3.5-Turbo`
 - `GPT-4`
 - `GPT-4 Turbo`
+- `GPT-4o`
 
 **Mistral AI**
 - `Mistral Small`
