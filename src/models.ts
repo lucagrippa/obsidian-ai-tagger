@@ -48,6 +48,14 @@ export const models: Array<ModelInfo> = [
         "type": CLOSED_SOURCE,
         "toolUse": true
     },
+    {
+        "company": OPENAI,
+        "modelName": "GPT-4o mini",
+        "modelId": "gpt-4o-mini-2024-07-18",
+        "tokenLimit": 128000,
+        "type": CLOSED_SOURCE,
+        "toolUse": true
+    },
     // {
     //     "company": MISTRAL_AI,
     //     "modelName": "Mistral 7B",
