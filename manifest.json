@@ -1,8 +1,8 @@
 {
 	"id": "ai-tagger",
 	"name": "AI Tagger",
-	"version": "1.1.6",
-	"minAppVersion": "0.16.0",
+	"version": "1.1.7",
+	"minAppVersion": "0.15.0",
 	"description": "Analyze and tag your document with one click for efficient note organization using AI. OpenAI or MistralAI API key required",
 	"author": "Luca Grippa",
 	"authorUrl": "https://lucagrippa.io",
