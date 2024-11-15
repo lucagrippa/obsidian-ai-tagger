@@ -55,13 +55,11 @@ export class LLM {
                 modelProvider: this.modelConfig.provider,
                 temperature: 0,
                 apiKey: this.apiKey,
+                baseUrl: this.baseUrl,
+                timeout: 10000,
                 clientOptions: {
                     dangerouslyAllowBrowser: true,
                 },
-                configuration: {
-                    baseURL: this.baseUrl,
-                    timeout: 10000,
-                }
             });
             return model.withStructuredOutput(tagger);
         } catch (error) {
@@ -157,7 +155,7 @@ export class LLM {
         } catch (error) {
             // print the type of error
             console.error(`Error while generating tags: ${this.modelConfig.company} ${this.modelConfig.modelId}`, error.message);
-            
+
             // Check for CORS-related errors
             if (this.modelConfig.provider !== 'ollama' && this.baseUrl && (error.message?.includes('CORS') || error.message?.includes('Access-Control-Allow-Headers'))) {
                 throw new Error('Error: Is "Custom Base URL" supported by this model?');
