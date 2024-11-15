@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"copy-prompts": "cp -r src/prompts/ dist/prompts/"
 	},
 	"keywords": [],
 	"author": "",
@@ -22,11 +23,16 @@
 		"typescript": "5.3.3"
 	},
 	"dependencies": {
-		"@langchain/anthropic": "^0.1.9",
-		"@langchain/mistralai": "^0.0.19",
-		"@langchain/openai": "^0.0.28",
+		"@langchain/anthropic": "^0.3.7",
+		"@langchain/community": "^0.3.12",
+		"@langchain/core": "^0.3.16",
+		"@langchain/groq": "^0.1.2",
+		"@langchain/mistralai": "^0.1.1",
+		"@langchain/ollama": "^0.1.1",
+		"@langchain/openai": "^0.3.12",
 		"@mistralai/mistralai": "^0.1.3",
-		"langchain": "^0.1.36",
+		"langchain": "^0.3.5",
+		"langfuse-langchain": "^3.29.1",
 		"openai": "^4.28.0"
 	}
 }
