@@ -1,47 +1,71 @@
-# AI Tagger
-AI Tagger is an Obsidian (https://obsidian.md) plugin that simplifies tagging by using OpenAI's advance Large Language Models (LLMs) to analyze and tag your document with one click! 
+# 🪄 AI Tagger
+AI Tagger is an Obsidian (https://obsidian.md) plugin that simplifies tagging by using various Large Language Models (LLMs) to analyze and tag your document with one click! 
 
 The plugin analyzes the current document that you have open in the editor and all of the previous tags that you have used. AI tagger will return up to 5 relevant tags that you have previously used and will generate up to 3 completely new tags.
 
-## How to use
+## 🤖 Supported AI Models
 
-### Supported LLM Providers
-**OpenAI**
-- `GPT-3.5-Turbo`
-- `GPT-4`
-- `GPT-4 Turbo`
-- `GPT-4o`
+| Provider | Model | Token Limit | Type |
+|----------|--------|-------------|------|
+| OpenAI | GPT-4o mini | 128K | Closed Source |
+| OpenAI | GPT-4o | 128K | Closed Source |
+| Mistral AI | Mistral Small | 32K | Closed Source |
+| Mistral AI | Mistral Large | 128K | Closed Source |
+| Mistral AI | Mistral Nemo | 128K | Open Source |
+| Anthropic | Claude 3.5 Haiku | 200K | Closed Source |
+| Anthropic | Claude 3.5 Sonnet | 200K | Closed Source |
+| Anthropic | Claude 3 Opus | 200K | Closed Source |
+| Groq | Llama 3 Groq 8B | 8K | Open Source |
+| Groq | Llama 3 Groq 70B | 8K | Open Source |
+| Groq | Llama 3.1 8B | 128K | Open Source |
+| Groq | Llama 3.1 70B | 128K | Open Source |
+| Ollama | Llama 3.2 | 128K | Open Source |
+| Ollama | Mistral Nemo | 128K | Open Source |
+| Ollama | Qwen 2.5 | 128K | Open Source |
 
-**Mistral AI**
-- `Mistral Small`
-- `Mistral Large`
+## 🚀 Setup
 
-### Setting up the AI Tagger
-- Enter your LLM provider API key in the settings tab. 
-- Pick the model (LLM) that you would like to use
+1. Install from Obsidian Community Plugins
+2. Enter your chosen provider's API key in settings
+3. Select your preferred model
+4. Optional: Configure custom API endpoint (useful for Ollama or proxies)
+
+## 📝 Usage
 
 ### One click tagging
-- the simplest way to use the plugin is from the ribbon located on the left sidebar.
-- click the "Wand" ribbon icon to automatically generate tags for your current document.
+
+- Click the "Wand" icon in the left sidebar to tag current note
 
     ![One click tagging](images/one_click_tagging.gif)
 
-### More precise tagging
-- another way to call the AI Tagger is from the Command palette (`Ctrl+P` or `Cmd+P` on macOS).
-- using the Command palette navigate to the "Generate tags" command to tag your current document.
-- to tag a specific part of your document highlight the text before using the Command palette.
+### Selection-Based Tagging
 
-    ![Command palette tagging](images/command_palette_tagging.gif)
+- Highlight text and use Command Palette (Ctrl/Cmd + P) → "Generate tags"
 
-### Lowercase Mode
-- if you prefer your tags to be in lowercase, you can enable the lowercase mode in the settings tab.
-- this mode forces every generated tag to be lowercase
+    ![Precise tagging](images/precise_tagging.gif)
 
-## Installation
-Navigate to the Obsidian settings and search AI Tagger in the Community plugins section. You can also manually download the latest release from this repository's GitHub releases by extracting the ZIP file to your Obsidian plugins folder.
+### Batch Tagging
 
-## Support
-If you encounter any issues while using the AI Tagger plugin or have any suggestions for improvement, submit an issue on this GitHub repository. Pull requests are also welcome.
+- Right-click file(s) or folders to tag multiple documents
 
-## License
+    ![Multi-file tagging](images/multi_file_tagging.gif)
+
+## 🔧 Configuration Options
+
+- Custom Endpoints: Set alternative API endpoints (default Ollama: http://localhost:11434)
+- Lowercase Tags: Force all tags to lowercase
+- Context Awareness: Plugin considers existing tags to avoid duplicates
+
+    ![Context-aware tagging](images/context_aware_tagging.gif)
+
+## 🤝 Contributing
+
+Found a bug? Have an idea? We'd love to hear from you:
+
+🐛 Report a bug
+💡 Request a feature
+🔧 Submit a PR
+
+## 📜 License
+
 [MIT License](LICENSE)
