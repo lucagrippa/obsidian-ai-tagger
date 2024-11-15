@@ -17,7 +17,6 @@ import {
 } from "@langchain/core/prompts";
 import { initChatModel } from "langchain/chat_models/universal";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
-import { CallbackHandler } from "langfuse-langchain"
 
 
 
@@ -98,19 +97,6 @@ export class LLM {
 
     async getPrompt() {
         try {
-            // if (!this.plugin.manifest.dir) {
-            //     throw new Error("Plugin directory not found");
-            // }
-            // const promptPath = join(this.plugin.manifest.dir, 'src', 'prompts', 'systemPrompt.md');
-            // console.log("Attempting to read prompt from:", promptPath);
-
-            // // Check if file exists before trying to read it
-            // const exists = await this.plugin.app.vault.adapter.exists(promptPath);
-            // if (!exists) {
-            //     throw new Error(`System prompt file not found at: ${promptPath}`);
-            // }
-
-            // const systemMessage = await this.plugin.app.vault.adapter.read(promptPath);
             console.log("System message loaded:", systemMessage.substring(0, 100) + "..."); // Log first 100 chars
             console.log("Example prompt:", await this.getExamplePrompt().formatMessages({}));
             const humanMessage = "EXISTING TAGS:\n```\n{inputTags}\n```\n\nDOCUMENT:\n```\n{document}\n```";
@@ -155,21 +141,14 @@ export class LLM {
     }
 
     async generateTags(documentText: string, existingTags: string[]): Promise<string[]> {
-        const langfuseLangchainHandler = new CallbackHandler({
-            publicKey: "pk-lf-c4706931-9b10-472b-baaa-32b916082379",
-            secretKey: "sk-lf-fb58853c-148d-46bb-a919-d56bb5578fc0",
-            baseUrl: "https://us.cloud.langfuse.com",
-            flushAt: 1
-        })
         const chain: Runnable = this.prompt.pipe(this.model)
-
         const tagsString: string = getTagsString(existingTags)
 
         try {
             const response = await chain.invoke({
                 inputTags: tagsString,
                 document: documentText,
-            }, { callbacks: [langfuseLangchainHandler] });
+            });
 
             console.debug("LLM Response: ", response)
 
