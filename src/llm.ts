@@ -6,6 +6,7 @@ import { ModelConfig } from './model-config'
 import { ModelService } from './model-service';
 import { getTagsString } from './utils';
 import { examples } from './prompts/examples';
+import { systemMessage } from './prompts/system-prompt';
 
 import { Runnable } from '@langchain/core/runnables';
 import {
@@ -73,7 +74,6 @@ export class LLM {
     getExamplePrompt() {
         const examplePrompt = ChatPromptTemplate.fromMessages([
             ["human", "EXISTING TAGS:\n```\n{inputTags}\n```\n\nDOCUMENT:\n```\n{document}\n```"],
-            // ["ai", "TAGS:\n```\n{existingTags}\n```\n\nNEW TAGS:\n```\n{newTags}\n```"],
             ["ai", "{response}"],
         ]);
 
@@ -98,19 +98,19 @@ export class LLM {
 
     async getPrompt() {
         try {
-            if (!this.plugin.manifest.dir) {
-                throw new Error("Plugin directory not found");
-            }
-            const promptPath = join(this.plugin.manifest.dir, 'src', 'prompts', 'systemPrompt.md');
-            console.log("Attempting to read prompt from:", promptPath);
+            // if (!this.plugin.manifest.dir) {
+            //     throw new Error("Plugin directory not found");
+            // }
+            // const promptPath = join(this.plugin.manifest.dir, 'src', 'prompts', 'systemPrompt.md');
+            // console.log("Attempting to read prompt from:", promptPath);
 
-            // Check if file exists before trying to read it
-            const exists = await this.plugin.app.vault.adapter.exists(promptPath);
-            if (!exists) {
-                throw new Error(`System prompt file not found at: ${promptPath}`);
-            }
+            // // Check if file exists before trying to read it
+            // const exists = await this.plugin.app.vault.adapter.exists(promptPath);
+            // if (!exists) {
+            //     throw new Error(`System prompt file not found at: ${promptPath}`);
+            // }
 
-            const systemMessage = await this.plugin.app.vault.adapter.read(promptPath);
+            // const systemMessage = await this.plugin.app.vault.adapter.read(promptPath);
             console.log("System message loaded:", systemMessage.substring(0, 100) + "..."); // Log first 100 chars
             console.log("Example prompt:", await this.getExamplePrompt().formatMessages({}));
             const humanMessage = "EXISTING TAGS:\n```\n{inputTags}\n```\n\nDOCUMENT:\n```\n{document}\n```";
