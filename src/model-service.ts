@@ -16,11 +16,11 @@ export class ModelService {
 
     static validateApiKey(key: string, provider: string): boolean {
         const patterns: Record<string, RegExp> = {
-            openai: /^sk-[A-Za-z0-9]{32,}$/,
-            mistralai: /^[A-Za-z0-9]{32,}$/,
-            anthropic: /^sk-ant-api[A-Za-z0-9-_]{98,}$/,
-            groq: /^gsk_[A-Za-z0-9]{52}$/,  // 56 chars total: 'gsk_' (4) + 52 chars
-            ollama: /.*/,  // Ollama doesn't require validation
+            openai: /^sk-[A-Za-z0-9-_]+$/,
+            mistralai: /^[A-Za-z0-9-_]+$/,
+            anthropic: /^sk-ant-api[A-Za-z0-9-_]+$/,
+            groq: /^gsk_[A-Za-z0-9-_]+$/,
+            ollama: /.*/,
         };
         return patterns[provider]?.test(key) ?? false;
     }
