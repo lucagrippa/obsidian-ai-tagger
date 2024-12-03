@@ -27,12 +27,6 @@ export default class AiTagger extends Plugin {
 			throw new Error(`Please set your ${modelConfig.company} API key in the plugin settings.`);
 		}
 
-		// Validate API key format
-		if (!ModelService.validateApiKey(apiKey, modelConfig.provider)) {
-			new Notice(`Invalid ${modelConfig.company} API key format.`);
-			throw new Error(`Invalid ${modelConfig.company} API key format.`);
-		}
-
 		try {
 			this.llm = await LLM.initialize(
 				settings.model,

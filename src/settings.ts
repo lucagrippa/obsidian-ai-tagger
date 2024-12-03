@@ -6,6 +6,7 @@ export interface AiTaggerSettings {
 	mistralaiApiKey: string;
 	anthropicApiKey: string;
 	groqApiKey: string;
+	googlegenaiApiKey: string;
 	ollamaApiKey: string;
 	model: string;
 	useCustomBaseUrl: boolean;

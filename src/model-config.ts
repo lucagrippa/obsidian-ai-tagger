@@ -3,7 +3,8 @@ export const COMPANIES = {
     MISTRAL_AI: "Mistral AI",
     ANTHROPIC: "Anthropic",
     GROQ: "Groq",
-    OLLAMA: "Ollama"
+    GOOGLE_GEN_AI: "Google Gen AI",
+    OLLAMA: "Ollama",
 } as const;
 
 export const MODEL_TYPES = {
@@ -128,6 +129,33 @@ export const MODEL_CONFIGS: ModelConfig[] = [
         modelId: "llama-3.1-70b-versatile",
         tokenLimit: 128000,
         type: "OPEN_SOURCE",
+        toolUse: true
+    },
+    {
+        company: "GOOGLE_GEN_AI",
+        provider: "google-genai",
+        modelName: "Gemini 1.5 Flash",
+        modelId: "gemini-1.5-flash",
+        tokenLimit: 1000000,
+        type: "CLOSED_SOURCE",
+        toolUse: true
+    },
+    {
+        company: "GOOGLE_GEN_AI",
+        provider: "google-genai",
+        modelName: "Gemini 1.5 Flash-8B",
+        modelId: "gemini-1.5-flash-8b",
+        tokenLimit: 1000000,
+        type: "CLOSED_SOURCE",
+        toolUse: true
+    },
+    {
+        company: "GOOGLE_GEN_AI",
+        provider: "google-genai",
+        modelName: "Gemini 1.5 Pro",
+        modelId: "gemini-1.5-pro",
+        tokenLimit: 1000000,
+        type: "CLOSED_SOURCE",
         toolUse: true
     },
     {

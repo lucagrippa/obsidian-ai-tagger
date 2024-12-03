@@ -18,8 +18,6 @@ import {
 import { initChatModel } from "langchain/chat_models/universal";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 
-
-
 const tagger = z.object({
     tags: z.array(z.string()).describe("An array of existing tags in the form \"#<existing_catgeory>\" that best categorizes the document."),
     newTags: z.array(z.string()).describe("An array of new tags in the form \"#<new_catgeory>\" that best categorizes the document."),
