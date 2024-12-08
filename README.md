@@ -15,6 +15,9 @@ The plugin analyzes the current document that you have open in the editor and al
 | Anthropic | Claude 3.5 Haiku | 200K | Closed Source |
 | Anthropic | Claude 3.5 Sonnet | 200K | Closed Source |
 | Anthropic | Claude 3 Opus | 200K | Closed Source |
+| Google | Gemini 1.5 Flash | 1M | Closed Source |
+| Google | Gemini 1.5 Flash-8B | 1M | Closed Source |
+| Google | Gemini 1.5 Pro | 1M | Closed Source |
 | Groq | Llama 3 Groq 8B | 8K | Open Source |
 | Groq | Llama 3 Groq 70B | 8K | Open Source |
 | Groq | Llama 3.1 8B | 128K | Open Source |
