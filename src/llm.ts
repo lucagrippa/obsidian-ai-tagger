@@ -9,6 +9,7 @@ import { examples } from './prompts/examples';
 import { systemMessage } from './prompts/system-prompt';
 
 import { Runnable } from '@langchain/core/runnables';
+import { JsonOutputParser } from "@langchain/core/output_parsers";
 import {
     FewShotChatMessagePromptTemplate,
     ChatPromptTemplate,
@@ -17,6 +18,7 @@ import {
 } from "@langchain/core/prompts";
 import { initChatModel } from "langchain/chat_models/universal";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { CallbackHandler } from "langfuse-langchain";
 
 const tagger = z.object({
     tags: z.array(z.string()).describe("An array of existing tags in the form \"#<existing_catgeory>\" that best categorizes the document."),
@@ -59,7 +61,26 @@ export class LLM {
                     dangerouslyAllowBrowser: true,
                 },
             });
-            return model.withStructuredOutput(tagger);
+
+            const tool = {
+                name: "tagger",
+                description: "Tagger tool",
+                schema: tagger,
+            }
+
+            if (this.modelId === "qwen2.5" || this.modelId === "mistral-nemo") {
+                if (!("bindTools" in model)) {
+                    return model.withStructuredOutput(tagger);
+                }
+                if (typeof model.bindTools === "function") {
+                    const modelWithTools = model.bindTools([tool]);
+                    const parser = new JsonOutputParser<typeof tagger>();
+                    return modelWithTools.pipe(parser);
+                }
+                throw new Error("Model doesn't support structured output or tools");
+            } else {
+                return model.withStructuredOutput(tagger);
+            }
         } catch (error) {
             console.error(`Error while instantiating model: ${this.modelConfig.company} ${this.modelConfig.modelId}`, error.message);
             throw new Error(`Error while instantiating model: ${this.modelConfig.company} ${this.modelConfig.modelId}`);
@@ -140,10 +161,24 @@ export class LLM {
         const chain: Runnable = this.prompt.pipe(this.model)
         const tagsString: string = getTagsString(existingTags)
 
+        // Initialize handler outside the if statement
+        let langfuseLangchainHandler: CallbackHandler | undefined;
+        
+        if (process.env.NODE_ENV === 'development') {
+            langfuseLangchainHandler = new CallbackHandler({
+                publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+                secretKey: process.env.LANGFUSE_SECRET_KEY,
+                baseUrl: process.env.LANGFUSE_BASE_URL,
+                flushAt: 1 // cookbook-only: do not batch events, send them immediately
+            });
+        }
+
         try {
             const response = await chain.invoke({
                 inputTags: tagsString,
                 document: documentText,
+            }, {
+                callbacks: langfuseLangchainHandler ? [langfuseLangchainHandler] : undefined
             });
 
             console.debug("LLM Response: ", response)

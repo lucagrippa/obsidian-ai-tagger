@@ -5,6 +5,7 @@ import { ModelService } from './model-service';
 import { AiTaggerSettings } from "./settings";
 import { AiTaggerSettingTab } from "./settings-tab";
 import { convertTagsToLowerCase } from "./utils";
+import * as dotenv from 'dotenv';
 
 const DEFAULT_SETTINGS: Partial<AiTaggerSettings> = {
 	model: 'gpt-4o-mini',
@@ -45,6 +46,16 @@ export default class AiTagger extends Plugin {
 		// Object.assign() is a JavaScript function that copies all properties from one object to another. 
 		// Any properties that are returned by loadData() override the properties in DEFAULT_SETTINGS.
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const basePath = (this.app.vault.adapter as any).basePath;
+		const pluginId = 'obsidian-ai-tagger'; // replace with your actual plugin ID
+
+		dotenv.config({
+			path: `${basePath}/.obsidian/plugins/${pluginId}/.env`,
+			debug: true // temporarily set to true to see debug output
+		});
+
+		// You might want to verify the path is correct
+		console.log('Env file path:', `${basePath}/.obsidian/plugins/${pluginId}/.env`);
 	}
 
 	// this function retrieves store data on the disk
