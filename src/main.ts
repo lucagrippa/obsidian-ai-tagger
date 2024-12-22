@@ -43,7 +43,7 @@ export default class AiTagger extends Plugin {
 
 	// this function retrieves data from disk
 	async loadSettings() {
-		// Object.assign() is a JavaScript function that copies all properties from one object to another. 
+		// Object.assign() is a JavaScript function that copies all properties from one object to another.
 		// Any properties that are returned by loadData() override the properties in DEFAULT_SETTINGS.
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 		const basePath = (this.app.vault.adapter as any).basePath;
@@ -129,7 +129,11 @@ export default class AiTagger extends Plugin {
 		this.addSettingTab(new AiTaggerSettingTab(this.app, this));
 
 		// initialize LLM
-		await this.initializeLlm();
+    try {
+      // To ensure the plugin remains functional even if an error occurs,
+      // we use a try-catch block to handle potential errors gracefully.
+		  await this.initializeLlm();
+    } catch {}
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
@@ -215,5 +219,3 @@ export default class AiTagger extends Plugin {
 
 	}
 }
-
-
