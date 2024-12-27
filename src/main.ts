@@ -63,7 +63,12 @@ export default class AiTagger extends Plugin {
 		// loadData() and saveData() provide an easy way to store and retrieve data from disk.
 		await this.saveData(this.settings);
 		// Reinitialize LLM when settings change
-		await this.initializeLlm();
+		try {
+			await this.initializeLlm();
+		} catch (error) {
+			console.error('Error reinitializing LLM:', error);
+			new Notice('Failed to reinitialize LLM. Please check your settings and API keys.');
+		}
 	}
 
 	async tagText(currentFile: TFile, text: string) {
@@ -129,11 +134,14 @@ export default class AiTagger extends Plugin {
 		this.addSettingTab(new AiTaggerSettingTab(this.app, this));
 
 		// initialize LLM
-    try {
-      // To ensure the plugin remains functional even if an error occurs,
-      // we use a try-catch block to handle potential errors gracefully.
-		  await this.initializeLlm();
-    } catch {}
+		try {
+			// To ensure the plugin remains functional even if an error occurs,
+			// we use a try-catch block to handle potential errors gracefully.
+			await this.initializeLlm();
+		} catch (error) {
+			console.error('Error initializing LLM:', error);
+			new Notice('Failed to initialize LLM. Please check your settings and API keys.');
+		}
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-2', 'Generate tags!', async () => {
