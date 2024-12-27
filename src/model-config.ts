@@ -134,6 +134,15 @@ export const MODEL_CONFIGS: ModelConfig[] = [
     {
         company: "GOOGLE_GEN_AI",
         provider: "google-genai",
+        modelName: "Gemini 2.0 Flash",
+        modelId: "gemini-2.0-flash-exp",
+        tokenLimit: 2_000_000,
+        type: "CLOSED_SOURCE",
+        toolUse: true
+    },
+    {
+        company: "GOOGLE_GEN_AI",
+        provider: "google-genai",
         modelName: "Gemini 1.5 Flash",
         modelId: "gemini-1.5-flash",
         tokenLimit: 1000000,
