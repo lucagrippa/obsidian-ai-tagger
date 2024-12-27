@@ -84,6 +84,18 @@ export class AiTaggerSettingTab extends PluginSettingTab {
             );
 
         new Setting(containerElement)
+            .setName('Language')
+            .setDesc('The language to generate tags in')
+            .addText(text =>
+                text
+                    .setValue(this.plugin.settings.language)
+                    .onChange(async (value) => {
+                        this.plugin.settings.language = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        new Setting(containerElement)
             .setName('Lowercase Mode')
             .setDesc('If enabled all tags will be generated with lowercase characters.')
             .addToggle((toggle) =>

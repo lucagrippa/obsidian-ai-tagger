@@ -11,6 +11,7 @@ export interface AiTaggerSettings {
 	model: string;
 	useCustomBaseUrl: boolean;
 	customBaseUrl: string;
+	language: string;
 	lowerCaseMode: boolean;
 	[key: `${string}ApiKey`]: string;
 }

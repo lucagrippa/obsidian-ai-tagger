@@ -31,4 +31,5 @@ You will receive:
 ## Important Notes:
 - All tags must include the # prefix
 - Be specific and avoid generic tags
-- Maintain consistent formatting`;
+- Maintain consistent formatting
+- Generate tags in {langauge} language`;

@@ -33,17 +33,19 @@ export class LLM {
     modelConfig: ModelConfig;
     prompt: ChatPromptTemplate;
     model: Runnable;
+    language: string;
 
-    constructor(modelId: string, apiKey: string, plugin: Plugin, baseURL: string | null = null) {
+    constructor(modelId: string, apiKey: string, plugin: Plugin, baseURL: string | null = null, language: string) {
         this.modelId = modelId;
         this.apiKey = apiKey;
         this.plugin = plugin;
         this.baseUrl = baseURL;
+        this.language = language;
         this.modelConfig = ModelService.getModelById(modelId);
     }
 
-    static async initialize(modelId: string, apiKey: string, plugin: Plugin, baseUrl: string | null = null): Promise<LLM> {
-        const instance = new LLM(modelId, apiKey, plugin, baseUrl);
+    static async initialize(modelId: string, apiKey: string, plugin: Plugin, baseUrl: string | null = null, language: string): Promise<LLM> {
+        const instance = new LLM(modelId, apiKey, plugin, baseUrl, language);
         instance.model = await instance.getModel();
         instance.prompt = await instance.getPrompt();
         return instance;
@@ -177,6 +179,7 @@ export class LLM {
             const response = await chain.invoke({
                 inputTags: tagsString,
                 document: documentText,
+                language: this.language,
             }, {
                 callbacks: langfuseLangchainHandler ? [langfuseLangchainHandler] : undefined
             });

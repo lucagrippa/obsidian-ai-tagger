@@ -33,7 +33,8 @@ export default class AiTagger extends Plugin {
 				settings.model,
 				apiKey,
 				this,
-				settings.useCustomBaseUrl ? settings.customBaseUrl : null
+				settings.useCustomBaseUrl ? settings.customBaseUrl : null,
+				settings.language
 			);
 		} catch (error) {
 			new Notice(`Failed to initialize ${modelConfig.company} model: ${error.message}`);
